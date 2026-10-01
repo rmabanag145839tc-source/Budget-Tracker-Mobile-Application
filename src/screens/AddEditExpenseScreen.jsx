@@ -1,128 +1,164 @@
-import React from 'react';
-import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import React, { useState } from 'react';
+import { Pressable, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native';
 import AppIcon from '../components/AppIcon';
+import { useBudget } from '../context/BudgetContext';
 import { colors } from '../theme/expenseTrackerTheme';
+import styles from './addEditExpenseStyles';
 
-// This form is a picture of the screen for now. It does not save anything yet.
-export default function AddEditExpenseScreen({ navigation }) {
+function todayAsText() {
+  // The date field uses YYYY-MM-DD (for example, 2026-10-01).
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function isValidDate(text) {
+  const parts = text.split('-');
+  if (text.length !== 10 || parts.length !== 3) return false;
+
+  const year = Number(parts[0]);
+  const month = Number(parts[1]);
+  const day = Number(parts[2]);
+  const date = new Date(year, month - 1, day);
+
+  // JavaScript fixes dates such as February 31, so compare the result.
+  return date.getFullYear() === year && date.getMonth() + 1 === month && date.getDate() === day;
+}
+
+export default function AddEditExpenseScreen({ navigation, route }) {
+  const { expenses, categories, saveExpense } = useBudget();
+  const expenseId = route.params?.expenseId;
+  // An ID means we are editing. Without one, this is a new expense.
+  const expenseToEdit = expenses.find((expense) => expense.id === expenseId);
+
+  // TextInputs keep text while the user types. We convert amount when saving.
+  const [amount, setAmount] = useState(expenseToEdit ? String(expenseToEdit.amount) : '');
+  const [category, setCategory] = useState(expenseToEdit?.category || 'Transport');
+  const [date, setDate] = useState(expenseToEdit?.date || todayAsText());
+  const [description, setDescription] = useState(expenseToEdit?.description || '');
+  const [showCategories, setShowCategories] = useState(false);
+  const [error, setError] = useState('');
+
+  function handleSave() {
+    const numberAmount = Number(amount);
+
+    if (!Number.isFinite(numberAmount) || numberAmount <= 0) {
+      setError('Enter an amount greater than zero.');
+      return;
+    }
+    if (!isValidDate(date)) {
+      setError('Enter a real date as YYYY-MM-DD.');
+      return;
+    }
+    if (!description.trim()) {
+      setError('Enter a description.');
+      return;
+    }
+
+    // Saving updates the shared React state, so the other screens refresh.
+    saveExpense({
+      id: expenseToEdit?.id,
+      amount: numberAmount,
+      category,
+      date,
+      description: description.trim(),
+    });
+    navigation.goBack();
+  }
+
   return (
     <SafeAreaView style={styles.screen}>
       <View style={styles.phone}>
         <View style={styles.header}>
-          {/* Return to the dashboard screen. */}
-          <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
+            onPress={() => navigation.goBack()}
+            style={styles.backButton}
+          >
             <AppIcon name="back" color={colors.text} size={22} />
           </Pressable>
-          <Text style={styles.title}>Add expense</Text>
+          <Text style={styles.title}>{expenseToEdit ? 'Edit expense' : 'Add expense'}</Text>
         </View>
 
-        {/* These fixed values are examples for the mockup, not saved expenses. */}
-        <ScrollView contentContainerStyle={styles.form}>
+        <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
           <Text style={styles.label}>Amount</Text>
-          <TextInput style={styles.amount} value="$0.00" editable={false} />
+          <TextInput
+            accessibilityLabel="Amount"
+            style={styles.amount}
+            value={amount}
+            onChangeText={setAmount}
+            keyboardType="decimal-pad"
+            placeholder="$0.00"
+            placeholderTextColor={colors.mutedText}
+          />
 
           <Text style={styles.label}>Category</Text>
-          <View style={[styles.field, styles.selectedField]}>
-            <Text style={styles.fieldText}>Transport</Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Choose category"
+            onPress={() => setShowCategories((current) => !current)}
+            style={[styles.field, styles.selectedField]}
+          >
+            <Text style={styles.fieldText}>{category}</Text>
             <AppIcon name="dropdown" color={colors.text} />
-          </View>
+          </Pressable>
+          {showCategories && (
+            <View style={styles.categoryChoices}>
+              {categories.map((choice) => (
+                <Pressable
+                  key={choice}
+                  onPress={() => {
+                    setCategory(choice);
+                    setShowCategories(false);
+                  }}
+                  style={styles.categoryChoice}
+                >
+                  <Text style={styles.fieldText}>{choice}</Text>
+                </Pressable>
+              ))}
+            </View>
+          )}
 
           <Text style={styles.label}>Date</Text>
           <View style={styles.field}>
-            <Text style={styles.fieldText}>09/22/2026</Text>
-            <AppIcon name="calendar" color={colors.text} />
+            <TextInput
+              accessibilityLabel="Date"
+              style={styles.dateInput}
+              value={date}
+              onChangeText={setDate}
+              placeholder="YYYY-MM-DD"
+              placeholderTextColor={colors.mutedText}
+              maxLength={10}
+            />
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Use today's date"
+              onPress={() => setDate(todayAsText())}
+            >
+              <AppIcon name="calendar" color={colors.text} />
+            </Pressable>
           </View>
 
           <Text style={styles.label}>Description</Text>
-          <TextInput style={styles.field} value="Bus Fee" editable={false} />
+          <TextInput
+            accessibilityLabel="Description"
+            style={styles.field}
+            value={description}
+            onChangeText={setDescription}
+            placeholder="What was this for?"
+            placeholderTextColor={colors.mutedText}
+          />
 
-          <Pressable accessibilityRole="button" style={styles.saveButton}>
-            <Text style={styles.saveText}>Save expense</Text>
+          {error ? <Text style={styles.error}>{error}</Text> : null}
+
+          <Pressable accessibilityRole="button" onPress={handleSave} style={styles.saveButton}>
+            <Text style={styles.saveText}>{expenseToEdit ? 'Save changes' : 'Save expense'}</Text>
           </Pressable>
         </ScrollView>
       </View>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: colors.background,
-    alignItems: 'center',
-  },
-  phone: {
-    flex: 1,
-    width: '100%',
-    maxWidth: 430,
-    backgroundColor: colors.card,
-    overflow: 'hidden',
-  },
-  header: {
-    height: 57,
-    backgroundColor: colors.navy,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  backButton: {
-    width: 34,
-    height: 44,
-    justifyContent: 'center',
-  },
-  title: {
-    color: colors.text,
-    fontSize: 18,
-    fontWeight: '700',
-    marginLeft: 8,
-  },
-  form: {
-    padding: 20,
-  },
-  label: {
-    color: colors.mutedText,
-    fontSize: 14,
-    marginTop: 16,
-    marginBottom: 6,
-  },
-  amount: {
-    height: 50,
-    color: colors.text,
-    fontSize: 35,
-    fontWeight: '600',
-  },
-  field: {
-    minHeight: 43,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 7,
-    backgroundColor: colors.input,
-    paddingHorizontal: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    color: colors.text,
-    fontSize: 16,
-  },
-  selectedField: {
-    borderColor: '#0870cd',
-    borderWidth: 1.5,
-  },
-  fieldText: {
-    color: colors.text,
-    fontSize: 16,
-  },
-  saveButton: {
-    height: 45,
-    backgroundColor: colors.navy,
-    borderRadius: 7,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 24,
-  },
-  saveText: {
-    color: colors.text,
-    fontSize: 14,
-    fontWeight: '700',
-  },
-});
