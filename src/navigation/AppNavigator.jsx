@@ -3,6 +3,9 @@ import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from '../screens/HomeScreen';
 import AddEditExpenseScreen from '../screens/AddEditExpenseScreen';
+import ExpenseHistoryScreen from '../screens/ExpenseHistoryScreen';
+import ExpenseDetailsScreen from '../screens/ExpenseDetailsScreen';
+import CategoriesScreen from '../screens/CategoriesScreen';
 import { colors } from '../theme/expenseTrackerTheme';
 
 const Stack = createNativeStackNavigator();
@@ -32,7 +35,10 @@ export default function AppNavigator() {
       >
         {/* Screen names are used when moving between screens. */}
         <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="History" component={ExpenseHistoryScreen} />
         <Stack.Screen name="AddExpense" component={AddEditExpenseScreen} />
+        <Stack.Screen name="ExpenseDetails" component={ExpenseDetailsScreen} />
+        <Stack.Screen name="Categories" component={CategoriesScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
