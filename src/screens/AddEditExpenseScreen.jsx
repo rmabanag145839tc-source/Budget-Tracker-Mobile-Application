@@ -1,30 +1,23 @@
 import React, { useState } from 'react';
-import { Pressable, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native';
+import { Platform, Pressable, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native';
+import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import AppIcon from '../components/AppIcon';
 import { useBudget } from '../context/BudgetContext';
 import { colors } from '../theme/expenseTrackerTheme';
 import styles from './addEditExpenseStyles';
 
-function todayAsText() {
-  // The date field uses YYYY-MM-DD (for example, 2026-10-01).
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, '0');
-  const day = String(today.getDate()).padStart(2, '0');
+function dateForStorage(date) {
+  // Expenses store dates as YYYY-MM-DD so monthly totals are easy to calculate.
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
 
-function isValidDate(text) {
-  const parts = text.split('-');
-  if (text.length !== 10 || parts.length !== 3) return false;
-
-  const year = Number(parts[0]);
-  const month = Number(parts[1]);
-  const day = Number(parts[2]);
-  const date = new Date(year, month - 1, day);
-
-  // JavaScript fixes dates such as February 31, so compare the result.
-  return date.getFullYear() === year && date.getMonth() + 1 === month && date.getDate() === day;
+function dateFromStorage(savedDate) {
+  if (!savedDate) return new Date();
+  const [year, month, day] = savedDate.split('-').map(Number);
+  return new Date(year, month - 1, day);
 }
 
 export default function AddEditExpenseScreen({ navigation, route }) {
@@ -36,20 +29,29 @@ export default function AddEditExpenseScreen({ navigation, route }) {
   // TextInputs keep text while the user types. We convert amount when saving.
   const [amount, setAmount] = useState(expenseToEdit ? String(expenseToEdit.amount) : '');
   const [category, setCategory] = useState(expenseToEdit?.category || 'Transport');
-  const [date, setDate] = useState(expenseToEdit?.date || todayAsText());
+  const [date, setDate] = useState(() => dateFromStorage(expenseToEdit?.date));
   const [description, setDescription] = useState(expenseToEdit?.description || '');
   const [showCategories, setShowCategories] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [error, setError] = useState('');
+
+  function openDatePicker() {
+    if (Platform.OS === 'android') {
+      DateTimePickerAndroid.open({
+        value: date,
+        mode: 'date',
+        onValueChange: (_, chosenDate) => setDate(chosenDate),
+      });
+    } else {
+      setShowDatePicker(true);
+    }
+  }
 
   function handleSave() {
     const numberAmount = Number(amount);
 
     if (!Number.isFinite(numberAmount) || numberAmount <= 0) {
       setError('Enter an amount greater than zero.');
-      return;
-    }
-    if (!isValidDate(date)) {
-      setError('Enter a real date as YYYY-MM-DD.');
       return;
     }
     if (!description.trim()) {
@@ -62,7 +64,7 @@ export default function AddEditExpenseScreen({ navigation, route }) {
       id: expenseToEdit?.id,
       amount: numberAmount,
       category,
-      date,
+      date: dateForStorage(date),
       description: description.trim(),
     });
     navigation.goBack();
@@ -128,24 +130,31 @@ export default function AddEditExpenseScreen({ navigation, route }) {
           )}
 
           <Text style={styles.label}>Date</Text>
-          <View style={styles.field}>
-            <TextInput
-              accessibilityLabel="Date"
-              style={styles.dateInput}
-              value={date}
-              onChangeText={setDate}
-              placeholder="YYYY-MM-DD"
-              placeholderTextColor={colors.mutedText}
-              maxLength={10}
-            />
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Use today's date"
-              onPress={() => setDate(todayAsText())}
-            >
-              <AppIcon name="calendar" color={colors.text} />
-            </Pressable>
-          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Choose date"
+            style={styles.field}
+            onPress={openDatePicker}
+          >
+            <Text style={styles.fieldText}>
+              {date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+            </Text>
+            <AppIcon name="calendar" color={colors.text} />
+          </Pressable>
+          {showDatePicker && Platform.OS === 'ios' && (
+            <View style={styles.datePickerPanel}>
+              <DateTimePicker
+                value={date}
+                mode="date"
+                display="inline"
+                themeVariant="dark"
+                onValueChange={(_, chosenDate) => setDate(chosenDate)}
+              />
+              <Pressable onPress={() => setShowDatePicker(false)} style={styles.dateDoneButton}>
+                <Text style={styles.dateDoneText}>Done</Text>
+              </Pressable>
+            </View>
+          )}
 
           <Text style={styles.label}>Description</Text>
           <TextInput

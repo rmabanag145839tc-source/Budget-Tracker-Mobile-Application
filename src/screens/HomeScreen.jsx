@@ -7,13 +7,23 @@ import AppIcon from '../components/AppIcon';
 import { useBudget } from '../context/BudgetContext';
 import { colors } from '../theme/expenseTrackerTheme';
 
+const categoryIcons = { Food: 'food', Transport: 'transport' };
+const categoryColors = { Food: colors.coral, Transport: colors.blue };
+
 export default function HomeScreen({ navigation }) {
-  const { expenses, monthlyBudget } = useBudget();
+  const { expenses, categories, monthlyBudget } = useBudget();
   const today = new Date();
   const thisMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
 
   // Only expenses dated this month change the monthly budget figures.
   const monthlyExpenses = expenses.filter((expense) => expense.date.startsWith(thisMonth));
+  // Keep the mockup's two cards; show any other category after it has spending this month.
+  const dashboardCategories = categories.filter(
+    (name) =>
+      name === 'Food' ||
+      name === 'Transport' ||
+      monthlyExpenses.some((expense) => expense.category === name)
+  );
   const monthlySpending = monthlyExpenses.reduce((total, expense) => total + expense.amount, 0);
   const remaining = monthlyBudget - monthlySpending;
   let safetyScore = Math.round((remaining / monthlyBudget) * 100);
@@ -64,16 +74,18 @@ export default function HomeScreen({ navigation }) {
             </View>
 
             <View style={styles.categoryRow}>
-              <View style={styles.categoryCard}>
-                <AppIcon name="food" color={colors.coral} />
-                <Text style={styles.categoryName}>Food</Text>
-                <Text style={styles.categoryAmount}>${categoryTotal('Food').toFixed(2)}</Text>
-              </View>
-              <View style={styles.categoryCard}>
-                <AppIcon name="transport" color={colors.blue} />
-                <Text style={styles.categoryName}>Transport</Text>
-                <Text style={styles.categoryAmount}>${categoryTotal('Transport').toFixed(2)}</Text>
-              </View>
+              {dashboardCategories.map((name) => (
+                <View key={name} style={styles.categoryCard}>
+                  <AppIcon
+                    name={categoryIcons[name] || 'categories'}
+                    color={categoryColors[name] || colors.green}
+                  />
+                  <Text style={styles.categoryName} numberOfLines={1}>
+                    {name}
+                  </Text>
+                  <Text style={styles.categoryAmount}>${categoryTotal(name).toFixed(2)}</Text>
+                </View>
+              ))}
             </View>
 
             <Text style={styles.sectionTitle}>Recent activity</Text>
@@ -171,12 +183,13 @@ const styles = StyleSheet.create({
   },
   categoryRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
     marginTop: 16,
     marginBottom: 20,
   },
   categoryCard: {
-    width: 92,
+    width: 120,
     minHeight: 78,
     backgroundColor: colors.smallCard,
     borderRadius: 11,

@@ -11,7 +11,7 @@ const symbols = {
   categories: '▦',
   back: '←',
   calendar: '▣',
-  dropdown: '⌄',
+  dropdown: '▾',
 };
 
 export default function AppIcon({ name, color, size = 20 }) {

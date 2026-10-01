@@ -81,10 +81,20 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
-  dateInput: {
-    flex: 1,
-    color: colors.text,
-    fontSize: 16,
+  datePickerPanel: {
+    backgroundColor: colors.input,
+    borderRadius: 7,
+    marginTop: 8,
+    paddingBottom: 8,
+  },
+  dateDoneButton: {
+    alignItems: 'flex-end',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  dateDoneText: {
+    color: colors.blue,
+    fontWeight: '700',
   },
   error: {
     color: colors.coral,

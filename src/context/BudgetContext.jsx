@@ -2,7 +2,7 @@ import React, { createContext, useContext, useRef, useState } from 'react';
 
 const BudgetContext = createContext(null);
 
-export const startingCategories = ['Food', 'Transport', 'Shopping', 'Bills', 'Other'];
+export const startingCategories = ['Food', 'Transport', 'Shopping', 'Bills'];
 
 // All demo data lives here. It resets when the app restarts.
 export function BudgetProvider({ children }) {
