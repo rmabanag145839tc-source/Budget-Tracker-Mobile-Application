@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import AppIcon from '../components/AppIcon';
 import { useBudget } from '../context/BudgetContext';
 import { colors } from '../theme/expenseTrackerTheme';
@@ -33,11 +33,16 @@ export default function ExpenseDetailsScreen({ navigation, route }) {
         </View>
 
         {expense ? (
-          <View style={styles.content}>
-            <Text style={styles.amount}>${expense.amount.toFixed(2)}</Text>
-            <Detail label="Description" value={expense.description} />
-            <Detail label="Category" value={expense.category} />
-            <Detail label="Date" value={expense.date} />
+          <ScrollView contentContainerStyle={styles.content}>
+            <View style={styles.summaryCard}>
+              <Text style={styles.summaryLabel}>EXPENSE AMOUNT</Text>
+              <Text style={styles.amount}>${expense.amount.toFixed(2)}</Text>
+            </View>
+            <View style={styles.detailCard}>
+              <Detail label="Description" value={expense.description} />
+              <Detail label="Category" value={expense.category} />
+              <Detail label="Date" value={expense.date} />
+            </View>
 
             <Pressable
               accessibilityRole="button"
@@ -49,7 +54,7 @@ export default function ExpenseDetailsScreen({ navigation, route }) {
             <Pressable accessibilityRole="button" onPress={confirmDelete} style={styles.deleteButton}>
               <Text style={styles.deleteText}>Delete expense</Text>
             </Pressable>
-          </View>
+          </ScrollView>
         ) : (
           <Text style={styles.missing}>This expense is no longer available.</Text>
         )}
@@ -80,7 +85,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.card,
   },
   header: {
-    height: 57,
+    height: 68,
     backgroundColor: colors.navy,
     flexDirection: 'row',
     alignItems: 'center',
@@ -89,22 +94,42 @@ const styles = StyleSheet.create({
   },
   title: {
     color: colors.text,
-    fontSize: 18,
+    fontSize: 21,
     fontWeight: '700',
   },
   content: {
-    padding: 20,
+    padding: 22,
+    paddingBottom: 36,
+  },
+  summaryCard: {
+    backgroundColor: colors.navy,
+    borderRadius: 16,
+    padding: 22,
+  },
+  summaryLabel: {
+    color: colors.mutedText,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1.2,
   },
   amount: {
     color: colors.text,
     fontSize: 34,
     fontWeight: '700',
-    marginBottom: 20,
+    marginTop: 8,
+  },
+  detailCard: {
+    backgroundColor: colors.smallCard,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    marginTop: 16,
   },
   detail: {
     borderBottomWidth: 1,
     borderColor: colors.border,
-    paddingVertical: 12,
+    paddingVertical: 14,
   },
   label: {
     color: colors.mutedText,
@@ -117,10 +142,10 @@ const styles = StyleSheet.create({
   },
   editButton: {
     backgroundColor: colors.navy,
-    borderRadius: 7,
-    padding: 14,
+    borderRadius: 12,
+    padding: 16,
     alignItems: 'center',
-    marginTop: 24,
+    marginTop: 22,
   },
   buttonText: {
     color: colors.text,
@@ -129,8 +154,8 @@ const styles = StyleSheet.create({
   deleteButton: {
     borderWidth: 1,
     borderColor: colors.coral,
-    borderRadius: 7,
-    padding: 14,
+    borderRadius: 12,
+    padding: 16,
     alignItems: 'center',
     marginTop: 12,
   },

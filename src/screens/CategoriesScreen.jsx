@@ -63,6 +63,7 @@ export default function CategoriesScreen({ navigation }) {
       <View style={styles.phone}>
         <View style={styles.header}>
           <Text style={styles.title}>Categories</Text>
+          <Text style={styles.subtitle}>Keep your spending organized</Text>
         </View>
 
         <ScrollView
@@ -75,21 +76,23 @@ export default function CategoriesScreen({ navigation }) {
           <Text style={styles.help}>Choose a category when you add an expense.</Text>
 
           {/* Keep this form above the list so the keyboard does not cover it. */}
-          <Text style={styles.label}>New category</Text>
-          <TextInput
-            accessibilityLabel="New category name"
-            style={styles.input}
-            value={newName}
-            onChangeText={setNewName}
-            placeholder="Example: Health"
-            placeholderTextColor={colors.mutedText}
-            maxLength={24}
-            returnKeyType="done"
-            onSubmitEditing={handleAdd}
-          />
-          <Pressable accessibilityRole="button" onPress={handleAdd} style={styles.addButton}>
-            <Text style={styles.buttonText}>Add category</Text>
-          </Pressable>
+          <View style={styles.addCard}>
+            <Text style={styles.label}>New category</Text>
+            <TextInput
+              accessibilityLabel="New category name"
+              style={styles.input}
+              value={newName}
+              onChangeText={setNewName}
+              placeholder="Example: Health"
+              placeholderTextColor={colors.mutedText}
+              maxLength={24}
+              returnKeyType="done"
+              onSubmitEditing={handleAdd}
+            />
+            <Pressable accessibilityRole="button" onPress={handleAdd} style={styles.addButton}>
+              <Text style={styles.buttonText}>Add category</Text>
+            </Pressable>
+          </View>
 
           <Text style={styles.listTitle}>Your categories</Text>
           {categories.map((name) => {
@@ -111,6 +114,8 @@ export default function CategoriesScreen({ navigation }) {
                     {name}
                   </Text>
                 )}
+
+                {isBuiltIn && <Text style={styles.defaultText}>Default</Text>}
 
                 {!isBuiltIn && editingName === name && (
                   <>
@@ -164,12 +169,19 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: colors.navy,
-    padding: 20,
+    paddingHorizontal: 22,
+    paddingTop: 22,
+    paddingBottom: 24,
   },
   title: {
     color: colors.text,
-    fontSize: 18,
+    fontSize: 21,
     fontWeight: '700',
+  },
+  subtitle: {
+    color: colors.mutedText,
+    fontSize: 13,
+    marginTop: 5,
   },
   content: {
     flex: 1,
@@ -181,26 +193,43 @@ const styles = StyleSheet.create({
   help: {
     color: colors.mutedText,
     marginTop: 20,
-    marginBottom: 8,
+    marginBottom: 18,
+    fontSize: 13,
+  },
+  addCard: {
+    backgroundColor: colors.smallCard,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 16,
+    padding: 16,
   },
   listTitle: {
-    color: colors.mutedText,
-    fontSize: 14,
-    marginTop: 24,
-    marginBottom: 4,
+    color: colors.text,
+    fontSize: 15,
+    fontWeight: '700',
+    marginTop: 28,
+    marginBottom: 6,
   },
   categoryRow: {
-    minHeight: 54,
-    borderBottomWidth: 1,
+    minHeight: 58,
+    backgroundColor: colors.smallCard,
+    borderWidth: 1,
     borderColor: colors.border,
+    borderRadius: 12,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 18,
+    gap: 12,
+    paddingHorizontal: 14,
+    marginTop: 8,
   },
   categoryName: {
     color: colors.text,
     fontSize: 16,
     flex: 1,
+  },
+  defaultText: {
+    color: colors.mutedText,
+    fontSize: 11,
   },
   editInput: {
     color: colors.text,
@@ -216,29 +245,30 @@ const styles = StyleSheet.create({
     color: colors.coral,
   },
   label: {
-    color: colors.mutedText,
-    marginTop: 16,
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: '600',
     marginBottom: 8,
   },
   input: {
     color: colors.text,
-    backgroundColor: colors.input,
+    backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 7,
+    borderRadius: 10,
     paddingHorizontal: 12,
-    height: 44,
+    height: 48,
   },
   addButton: {
     backgroundColor: colors.navy,
-    borderRadius: 7,
-    padding: 14,
+    borderRadius: 10,
+    padding: 13,
     alignItems: 'center',
-    marginTop: 16,
-    marginBottom: 4,
+    marginTop: 12,
   },
   buttonText: {
     color: colors.text,
     fontWeight: '700',
+    fontSize: 14,
   },
 });

@@ -20,9 +20,17 @@ export default function ExpenseHistoryScreen({ navigation }) {
       <View style={styles.phone}>
         <View style={styles.header}>
           <Text style={styles.title}>Expense history</Text>
+          <Text style={styles.subtitle}>
+            {expenses.length === 1 ? '1 expense recorded' : `${expenses.length} expenses recorded`}
+          </Text>
         </View>
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filters}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.filters}
+          contentContainerStyle={styles.filterContent}
+        >
           {['All', ...categories].map((name) => (
             <Pressable
               key={name}
@@ -30,18 +38,23 @@ export default function ExpenseHistoryScreen({ navigation }) {
               onPress={() => setFilter(name)}
               style={[styles.filter, selectedFilter === name && styles.selectedFilter]}
             >
-              <Text style={styles.filterText}>{name}</Text>
+              <Text style={[styles.filterText, selectedFilter === name && styles.selectedFilterText]}>
+                {name}
+              </Text>
             </Pressable>
           ))}
         </ScrollView>
 
         <ScrollView style={styles.list}>
           {visibleExpenses.length === 0 ? (
-            <Text style={styles.emptyText}>
-              {expenses.length === 0
-                ? 'No expenses yet. Tap + to add one.'
-                : 'No expenses in this category.'}
-            </Text>
+            <View style={styles.emptyCard}>
+              <Text style={styles.emptyTitle}>Nothing to show yet</Text>
+              <Text style={styles.emptyText}>
+                {expenses.length === 0
+                  ? 'Tap + to add your first expense.'
+                  : 'Try another category to see its expenses.'}
+              </Text>
+            </View>
           ) : (
             visibleExpenses.map((expense) => (
               <ExpenseRow
@@ -73,40 +86,68 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: colors.navy,
-    padding: 20,
+    paddingHorizontal: 22,
+    paddingTop: 22,
+    paddingBottom: 24,
   },
   title: {
     color: colors.text,
-    fontSize: 18,
+    fontSize: 21,
     fontWeight: '700',
+  },
+  subtitle: {
+    color: colors.mutedText,
+    fontSize: 13,
+    marginTop: 5,
   },
   filters: {
     flexGrow: 0,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
+  },
+  filterContent: {
+    paddingHorizontal: 20,
+    paddingVertical: 14,
   },
   filter: {
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 18,
-    paddingHorizontal: 14,
-    paddingVertical: 7,
+    borderRadius: 20,
+    backgroundColor: colors.smallCard,
+    paddingHorizontal: 15,
+    paddingVertical: 8,
     marginRight: 8,
   },
   selectedFilter: {
     backgroundColor: colors.navy,
-    borderColor: colors.blue,
+    borderColor: colors.green,
   },
   filterText: {
-    color: colors.text,
+    color: colors.mutedText,
     fontSize: 13,
+  },
+  selectedFilterText: {
+    color: colors.text,
+    fontWeight: '700',
   },
   list: {
     flex: 1,
     paddingHorizontal: 20,
   },
+  emptyCard: {
+    backgroundColor: colors.smallCard,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 16,
+    padding: 18,
+    marginTop: 8,
+  },
+  emptyTitle: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: '700',
+  },
   emptyText: {
     color: colors.mutedText,
-    marginTop: 20,
+    fontSize: 13,
+    marginTop: 5,
   },
 });

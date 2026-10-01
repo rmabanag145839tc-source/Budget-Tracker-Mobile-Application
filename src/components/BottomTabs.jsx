@@ -30,6 +30,7 @@ export default function BottomTabs({ navigation, currentScreen }) {
           onPress={() => openTab(tab.screen)}
           style={styles.button}
         >
+          {currentScreen === tab.screen && <View style={styles.activeMark} />}
           <AppIcon
             name={tab.icon}
             color={currentScreen === tab.screen ? colors.green : colors.mutedText}
@@ -43,7 +44,7 @@ export default function BottomTabs({ navigation, currentScreen }) {
 
 const styles = StyleSheet.create({
   bar: {
-    height: 56,
+    height: 60,
     borderTopWidth: 1,
     borderColor: colors.border,
     flexDirection: 'row',
@@ -53,5 +54,14 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  activeMark: {
+    position: 'absolute',
+    top: 0,
+    width: 28,
+    height: 3,
+    borderBottomLeftRadius: 3,
+    borderBottomRightRadius: 3,
+    backgroundColor: colors.green,
   },
 });

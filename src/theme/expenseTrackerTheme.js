@@ -1,14 +1,15 @@
-// The shared color palette. Edit these values to recolor both screens.
+// One color palette keeps every screen consistent.
 export const colors = {
-  background: '#151515',
-  card: '#1b1b1b',
-  smallCard: '#171819',
-  input: '#1c1c1c',
-  navy: '#082746',
-  text: '#f4f5f6',
-  mutedText: '#aeb9c4',
-  green: '#159b72',
-  blue: '#2888ef',
-  coral: '#ed603b',
-  border: '#343535',
+  background: '#111718',
+  card: '#1a2021',
+  smallCard: '#222b2c',
+  input: '#1d2627',
+  navy: '#0b2b49',
+  navyBorder: '#31506b',
+  text: '#f7f8f7',
+  mutedText: '#a9b8b9',
+  green: '#20aa7d',
+  blue: '#4a9cf0',
+  coral: '#ef7659',
+  border: '#344244',
 };

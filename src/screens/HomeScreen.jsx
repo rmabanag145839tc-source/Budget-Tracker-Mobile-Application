@@ -49,19 +49,26 @@ export default function HomeScreen({ navigation }) {
       <View style={styles.phone}>
         <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
           <View style={styles.balanceCard}>
-            <Text style={styles.mutedText}>Monthly budget preview</Text>
-            <Text style={styles.name}>Overview</Text>
-            <Text style={[styles.mutedText, styles.balanceLabel]}>Remaining balance</Text>
+            <Text style={styles.eyebrow}>MONTHLY OVERVIEW</Text>
+            <Text style={styles.name}>Your budget</Text>
+            <Text style={styles.balanceLabel}>Remaining balance</Text>
             <Text style={[styles.balance, remaining < 0 && styles.negativeBalance]}>
               {remaining < 0 ? '-' : ''}${Math.abs(remaining).toFixed(2)}
             </Text>
-            <Text style={styles.budgetNote}>
-              Monthly budget ${monthlyBudget.toFixed(2)} · Spent ${monthlySpending.toFixed(2)}
-            </Text>
+            <View style={styles.balanceSummary}>
+              <View>
+                <Text style={styles.summaryLabel}>BUDGET</Text>
+                <Text style={styles.summaryValue}>${monthlyBudget.toFixed(2)}</Text>
+              </View>
+              <View>
+                <Text style={styles.summaryLabel}>SPENT</Text>
+                <Text style={styles.summaryValue}>${monthlySpending.toFixed(2)}</Text>
+              </View>
+            </View>
           </View>
 
           <View style={styles.dashboard}>
-            <View style={styles.safetyRow}>
+            <View style={styles.safetyCard}>
               <SafetyGauge percent={safetyScore} />
               <View>
                 <Text style={[styles.safetyTitle, safetyScore < 30 && styles.lowBudget]}>
@@ -73,13 +80,17 @@ export default function HomeScreen({ navigation }) {
               </View>
             </View>
 
+            <Text style={styles.sectionTitle}>This month by category</Text>
             <View style={styles.categoryRow}>
               {dashboardCategories.map((name) => (
                 <View key={name} style={styles.categoryCard}>
-                  <AppIcon
-                    name={categoryIcons[name] || 'categories'}
-                    color={categoryColors[name] || colors.green}
-                  />
+                  <View style={styles.categoryIcon}>
+                    <AppIcon
+                      name={categoryIcons[name] || 'categories'}
+                      color={categoryColors[name] || colors.green}
+                      size={18}
+                    />
+                  </View>
                   <Text style={styles.categoryName} numberOfLines={1}>
                     {name}
                   </Text>
@@ -90,7 +101,10 @@ export default function HomeScreen({ navigation }) {
 
             <Text style={styles.sectionTitle}>Recent activity</Text>
             {expenses.length === 0 ? (
-              <Text style={styles.emptyText}>No expenses yet. Tap + to add one.</Text>
+              <View style={styles.emptyCard}>
+                <Text style={styles.emptyTitle}>Nothing spent yet</Text>
+                <Text style={styles.emptyText}>Tap + below to add your first expense.</Text>
+              </View>
             ) : (
               expenses.slice(0, 3).map((expense) => (
                 <ExpenseRow
@@ -124,49 +138,78 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   balanceCard: {
-    minHeight: 190,
+    minHeight: 230,
     backgroundColor: colors.navy,
-    padding: 20,
-    paddingBottom: 24,
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    paddingBottom: 28,
   },
-  mutedText: {
-    color: colors.mutedText,
-    fontSize: 14,
+  eyebrow: {
+    color: colors.green,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1.6,
   },
   name: {
     color: colors.text,
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '700',
+    marginTop: 5,
   },
   balanceLabel: {
-    marginTop: 12,
+    color: colors.mutedText,
+    fontSize: 14,
+    marginTop: 24,
   },
   balance: {
     color: colors.text,
-    fontSize: 31,
+    fontSize: 36,
     fontWeight: '700',
+    marginTop: 2,
   },
   negativeBalance: {
     color: colors.coral,
   },
-  budgetNote: {
+  balanceSummary: {
+    borderTopWidth: 1,
+    borderColor: colors.navyBorder,
+    flexDirection: 'row',
+    gap: 36,
+    marginTop: 22,
+    paddingTop: 14,
+  },
+  summaryLabel: {
     color: colors.mutedText,
-    fontSize: 12,
-    marginTop: 6,
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 1,
+  },
+  summaryValue: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: '600',
+    marginTop: 3,
   },
   dashboard: {
     backgroundColor: colors.card,
-    borderTopLeftRadius: 22,
-    borderTopRightRadius: 22,
-    marginTop: -1,
-    padding: 20,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    marginTop: -18,
+    paddingHorizontal: 20,
+    paddingTop: 24,
+    paddingBottom: 30,
   },
-  safetyRow: {
-    minHeight: 92,
+  safetyCard: {
+    minHeight: 112,
+    backgroundColor: colors.smallCard,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 18,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 16,
+    gap: 20,
+    padding: 12,
   },
   safetyTitle: {
     color: colors.green,
@@ -184,35 +227,61 @@ const styles = StyleSheet.create({
   categoryRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
-    marginTop: 16,
-    marginBottom: 20,
+    gap: 10,
+    marginTop: 10,
+    marginBottom: 24,
   },
   categoryCard: {
-    width: 120,
-    minHeight: 78,
+    width: 124,
+    minHeight: 112,
     backgroundColor: colors.smallCard,
-    borderRadius: 11,
-    padding: 10,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: 12,
     justifyContent: 'center',
   },
+  categoryIcon: {
+    width: 34,
+    height: 34,
+    backgroundColor: colors.navy,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
   categoryName: {
-    color: colors.text,
-    fontSize: 13,
+    color: colors.mutedText,
+    fontSize: 12,
   },
   categoryAmount: {
     color: colors.text,
-    fontSize: 13,
-    fontWeight: '600',
+    fontSize: 15,
+    fontWeight: '700',
+    marginTop: 2,
   },
   sectionTitle: {
-    color: colors.mutedText,
+    color: colors.text,
+    fontSize: 15,
+    fontWeight: '700',
+    marginTop: 24,
+  },
+  emptyCard: {
+    backgroundColor: colors.smallCard,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 16,
+    padding: 18,
+    marginTop: 12,
+  },
+  emptyTitle: {
+    color: colors.text,
     fontSize: 14,
-    paddingBottom: 8,
+    fontWeight: '700',
   },
   emptyText: {
     color: colors.mutedText,
-    fontSize: 14,
-    paddingVertical: 14,
+    fontSize: 13,
+    marginTop: 5,
   },
 });

@@ -92,15 +92,18 @@ export default function AddEditExpenseScreen({ navigation, route }) {
           automaticallyAdjustKeyboardInsets
         >
           <Text style={styles.label}>Amount</Text>
-          <TextInput
-            accessibilityLabel="Amount"
-            style={styles.amount}
-            value={amount}
-            onChangeText={setAmount}
-            keyboardType="decimal-pad"
-            placeholder="$0.00"
-            placeholderTextColor={colors.mutedText}
-          />
+          <View style={styles.amountBox}>
+            <Text style={styles.currencySymbol}>$</Text>
+            <TextInput
+              accessibilityLabel="Amount"
+              style={styles.amount}
+              value={amount}
+              onChangeText={setAmount}
+              keyboardType="decimal-pad"
+              placeholder="0.00"
+              placeholderTextColor={colors.mutedText}
+            />
+          </View>
 
           <Text style={styles.label}>Category</Text>
           <Pressable
