@@ -11,6 +11,15 @@ const tabs = [
 ];
 
 export default function BottomTabs({ navigation, currentScreen }) {
+  function openTab(screen) {
+    // A fresh add screen starts with empty fields every time.
+    if (screen === 'AddExpense') {
+      navigation.push('AddExpense');
+    } else {
+      navigation.navigate(screen);
+    }
+  }
+
   return (
     <View style={styles.bar}>
       {tabs.map((tab) => (
@@ -18,7 +27,7 @@ export default function BottomTabs({ navigation, currentScreen }) {
           key={tab.screen}
           accessibilityRole="button"
           accessibilityLabel={tab.label}
-          onPress={() => navigation.navigate(tab.screen)}
+          onPress={() => openTab(tab.screen)}
           style={styles.button}
         >
           <AppIcon
@@ -41,7 +50,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.card,
   },
   button: {
-    width: '25%',
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -1,15 +1,12 @@
 import React from 'react';
-import { Text } from 'react-native';
+import { Text, View } from 'react-native';
 
-// Simple text symbols keep the icons easy to read and change.
-// Use these names in screens, for example: <AppIcon name="home" />.
+// Simple symbols avoid hard-to-read SVG paths.
 const symbols = {
   food: '🍴',
   transport: '🚌',
-  coffee: '☕',
-  book: '▤',
   home: '⌂',
-  history: '☷',
+  history: '≡',
   add: '+',
   categories: '▦',
   back: '←',
@@ -18,5 +15,28 @@ const symbols = {
 };
 
 export default function AppIcon({ name, color, size = 20 }) {
-  return <Text style={{ color, fontSize: size }}>{symbols[name]}</Text>;
+  // The fixed box keeps different symbols centered in the same space.
+  return (
+    <View
+      style={{
+        width: size + 10,
+        height: size + 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <Text
+        allowFontScaling={false}
+        style={{
+          color,
+          fontSize: size,
+          lineHeight: size + 4,
+          textAlign: 'center',
+          includeFontPadding: false,
+        }}
+      >
+        {symbols[name]}
+      </Text>
+    </View>
+  );
 }

@@ -16,12 +16,22 @@ export default function HomeScreen({ navigation }) {
   const monthlyExpenses = expenses.filter((expense) => expense.date.startsWith(thisMonth));
   const monthlySpending = monthlyExpenses.reduce((total, expense) => total + expense.amount, 0);
   const remaining = monthlyBudget - monthlySpending;
-  const safetyScore = Math.max(0, Math.min(100, Math.round((remaining / monthlyBudget) * 100)));
+  let safetyScore = Math.round((remaining / monthlyBudget) * 100);
+  if (safetyScore < 0) {
+    safetyScore = 0;
+  }
+  if (safetyScore > 100) {
+    safetyScore = 100;
+  }
 
   function categoryTotal(name) {
-    return monthlyExpenses
-      .filter((expense) => expense.category === name)
-      .reduce((total, expense) => total + expense.amount, 0);
+    let total = 0;
+    for (const expense of monthlyExpenses) {
+      if (expense.category === name) {
+        total += expense.amount;
+      }
+    }
+    return total;
   }
 
   return (
@@ -32,7 +42,7 @@ export default function HomeScreen({ navigation }) {
             <Text style={styles.mutedText}>Monthly budget preview</Text>
             <Text style={styles.name}>Overview</Text>
             <Text style={[styles.mutedText, styles.balanceLabel]}>Remaining balance</Text>
-            <Text style={styles.balance}>
+            <Text style={[styles.balance, remaining < 0 && styles.negativeBalance]}>
               {remaining < 0 ? '-' : ''}${Math.abs(remaining).toFixed(2)}
             </Text>
             <Text style={styles.budgetNote}>
@@ -44,7 +54,9 @@ export default function HomeScreen({ navigation }) {
             <View style={styles.safetyRow}>
               <SafetyGauge percent={safetyScore} />
               <View>
-                <Text style={styles.safetyTitle}>{safetyScore >= 30 ? 'Budget safe' : 'Budget low'}</Text>
+                <Text style={[styles.safetyTitle, safetyScore < 30 && styles.lowBudget]}>
+                  {safetyScore >= 30 ? 'Budget safe' : 'Budget low'}
+                </Text>
                 <Text style={styles.smallText}>
                   {safetyScore >= 30 ? "You're on track" : 'Watch your spending'}
                 </Text>
@@ -122,6 +134,9 @@ const styles = StyleSheet.create({
     fontSize: 31,
     fontWeight: '700',
   },
+  negativeBalance: {
+    color: colors.coral,
+  },
   budgetNote: {
     color: colors.mutedText,
     fontSize: 12,
@@ -146,6 +161,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     marginBottom: 4,
+  },
+  lowBudget: {
+    color: colors.coral,
   },
   smallText: {
     color: colors.mutedText,

@@ -8,8 +8,12 @@ import { colors } from '../theme/expenseTrackerTheme';
 export default function ExpenseHistoryScreen({ navigation }) {
   const { expenses, categories } = useBudget();
   const [filter, setFilter] = useState('All');
+  // A renamed or deleted category should not leave the history stuck on an old filter.
+  const selectedFilter = categories.includes(filter) ? filter : 'All';
   const visibleExpenses =
-    filter === 'All' ? expenses : expenses.filter((expense) => expense.category === filter);
+    selectedFilter === 'All'
+      ? expenses
+      : expenses.filter((expense) => expense.category === selectedFilter);
 
   return (
     <SafeAreaView style={styles.screen}>
@@ -24,7 +28,7 @@ export default function ExpenseHistoryScreen({ navigation }) {
               key={name}
               accessibilityRole="button"
               onPress={() => setFilter(name)}
-              style={[styles.filter, filter === name && styles.selectedFilter]}
+              style={[styles.filter, selectedFilter === name && styles.selectedFilter]}
             >
               <Text style={styles.filterText}>{name}</Text>
             </Pressable>

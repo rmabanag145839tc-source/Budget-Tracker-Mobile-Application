@@ -83,7 +83,12 @@ export default function AddEditExpenseScreen({ navigation, route }) {
           <Text style={styles.title}>{expenseToEdit ? 'Edit expense' : 'Add expense'}</Text>
         </View>
 
-        <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          contentContainerStyle={styles.form}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          automaticallyAdjustKeyboardInsets
+        >
           <Text style={styles.label}>Amount</Text>
           <TextInput
             accessibilityLabel="Amount"

@@ -35,6 +35,7 @@ const styles = StyleSheet.create({
   },
   form: {
     padding: 20,
+    paddingBottom: 36,
   },
   label: {
     color: colors.mutedText,
@@ -62,7 +63,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   selectedField: {
-    borderColor: '#0870cd',
+    borderColor: colors.blue,
     borderWidth: 1.5,
   },
   fieldText: {

@@ -17,7 +17,10 @@ export function BudgetProvider({ children }) {
     // An existing ID means replace that expense. Otherwise add a new one.
     if (details.id) {
       setExpenses((current) =>
-        current.map((expense) => (expense.id === details.id ? details : expense))
+        current.map((expense) => {
+          if (expense.id === details.id) return details;
+          return expense;
+        })
       );
       return;
     }
@@ -37,11 +40,17 @@ export function BudgetProvider({ children }) {
 
   function renameCategory(oldName, newName) {
     // Keep the category list and any expenses using that name in sync.
-    setCategories((current) => current.map((name) => (name === oldName ? newName : name)));
+    setCategories((current) =>
+      current.map((name) => {
+        if (name === oldName) return newName;
+        return name;
+      })
+    );
     setExpenses((current) =>
-      current.map((expense) =>
-        expense.category === oldName ? { ...expense, category: newName } : expense
-      )
+      current.map((expense) => {
+        if (expense.category === oldName) return { ...expense, category: newName };
+        return expense;
+      })
     );
   }
 

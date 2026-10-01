@@ -9,41 +9,41 @@ export default function CategoriesScreen({ navigation }) {
   const [newName, setNewName] = useState('');
   const [editingName, setEditingName] = useState('');
   const [draftName, setDraftName] = useState('');
-  const [error, setError] = useState('');
 
   function nameIsTaken(name, currentName = '') {
-    return categories.some(
-      (category) => category.toLowerCase() === name.toLowerCase() && category !== currentName
-    );
+    for (const category of categories) {
+      if (category !== currentName && category.toLowerCase() === name.toLowerCase()) {
+        return true;
+      }
+    }
+    return false;
   }
 
   function handleAdd() {
     const name = newName.trim();
     if (!name) {
-      setError('Enter a category name.');
+      Alert.alert('Enter a category name.');
       return;
     }
     if (nameIsTaken(name)) {
-      setError('That category already exists.');
+      Alert.alert('That category already exists.');
       return;
     }
 
     addCategory(name);
     setNewName('');
-    setError('');
   }
 
   function handleRename() {
     const name = draftName.trim();
     if (!name || nameIsTaken(name, editingName)) {
-      setError('Enter a different category name.');
+      Alert.alert('Enter a different category name.');
       return;
     }
 
     // Renaming also changes the category on any expenses that used it.
     renameCategory(editingName, name);
     setEditingName('');
-    setError('');
   }
 
   function handleDelete(name) {
@@ -65,8 +65,33 @@ export default function CategoriesScreen({ navigation }) {
           <Text style={styles.title}>Categories</Text>
         </View>
 
-        <ScrollView style={styles.content} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          style={styles.content}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          automaticallyAdjustKeyboardInsets
+        >
           <Text style={styles.help}>Choose a category when you add an expense.</Text>
+
+          {/* Keep this form above the list so the keyboard does not cover it. */}
+          <Text style={styles.label}>New category</Text>
+          <TextInput
+            accessibilityLabel="New category name"
+            style={styles.input}
+            value={newName}
+            onChangeText={setNewName}
+            placeholder="Example: Health"
+            placeholderTextColor={colors.mutedText}
+            maxLength={24}
+            returnKeyType="done"
+            onSubmitEditing={handleAdd}
+          />
+          <Pressable accessibilityRole="button" onPress={handleAdd} style={styles.addButton}>
+            <Text style={styles.buttonText}>Add category</Text>
+          </Pressable>
+
+          <Text style={styles.listTitle}>Your categories</Text>
           {categories.map((name) => {
             const isBuiltIn = startingCategories.includes(name);
 
@@ -78,10 +103,13 @@ export default function CategoriesScreen({ navigation }) {
                     style={styles.editInput}
                     value={draftName}
                     onChangeText={setDraftName}
+                    maxLength={24}
                     autoFocus
                   />
                 ) : (
-                  <Text style={styles.categoryName}>{name}</Text>
+                  <Text style={styles.categoryName} numberOfLines={1}>
+                    {name}
+                  </Text>
                 )}
 
                 {!isBuiltIn && editingName === name && (
@@ -101,7 +129,6 @@ export default function CategoriesScreen({ navigation }) {
                       onPress={() => {
                         setEditingName(name);
                         setDraftName(name);
-                        setError('');
                       }}
                     >
                       <Text style={styles.action}>Edit</Text>
@@ -115,19 +142,6 @@ export default function CategoriesScreen({ navigation }) {
             );
           })}
 
-          <Text style={styles.label}>New category</Text>
-          <TextInput
-            accessibilityLabel="New category name"
-            style={styles.input}
-            value={newName}
-            onChangeText={setNewName}
-            placeholder="Example: Health"
-            placeholderTextColor={colors.mutedText}
-          />
-          {error ? <Text style={styles.error}>{error}</Text> : null}
-          <Pressable accessibilityRole="button" onPress={handleAdd} style={styles.addButton}>
-            <Text style={styles.buttonText}>Add category</Text>
-          </Pressable>
         </ScrollView>
 
         <BottomTabs navigation={navigation} currentScreen="Categories" />
@@ -161,9 +175,19 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
   },
+  scrollContent: {
+    paddingBottom: 32,
+  },
   help: {
     color: colors.mutedText,
-    marginVertical: 20,
+    marginTop: 20,
+    marginBottom: 8,
+  },
+  listTitle: {
+    color: colors.mutedText,
+    fontSize: 14,
+    marginTop: 24,
+    marginBottom: 4,
   },
   categoryRow: {
     minHeight: 54,
@@ -193,7 +217,7 @@ const styles = StyleSheet.create({
   },
   label: {
     color: colors.mutedText,
-    marginTop: 28,
+    marginTop: 16,
     marginBottom: 8,
   },
   input: {
@@ -205,17 +229,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     height: 44,
   },
-  error: {
-    color: colors.coral,
-    marginTop: 8,
-  },
   addButton: {
     backgroundColor: colors.navy,
     borderRadius: 7,
     padding: 14,
     alignItems: 'center',
     marginTop: 16,
-    marginBottom: 32,
+    marginBottom: 4,
   },
   buttonText: {
     color: colors.text,
