@@ -1,8 +1,10 @@
 import React from 'react';
 import { Alert, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import AppIcon from '../components/AppIcon';
+import BrandMark from '../components/BrandMark';
 import { useBudget } from '../context/BudgetContext';
 import { colors } from '../theme/expenseTrackerTheme';
+import { formatPeso } from '../utils/formatPeso';
 
 export default function ExpenseDetailsScreen({ navigation, route }) {
   const { expenses, deleteExpense } = useBudget();
@@ -35,13 +37,14 @@ export default function ExpenseDetailsScreen({ navigation, route }) {
             <AppIcon name="back" color={colors.text} size={22} />
           </Pressable>
           <Text style={styles.title}>Expense details</Text>
+          <View style={styles.headerLogo}><BrandMark /></View>
         </View>
 
         {expense ? (
           <ScrollView contentContainerStyle={styles.content}>
             <View style={styles.summaryCard}>
               <Text style={styles.summaryLabel}>EXPENSE AMOUNT</Text>
-              <Text style={styles.amount}>${expense.amount.toFixed(2)}</Text>
+              <Text style={styles.amount}>{formatPeso(expense.amount)}</Text>
             </View>
             <View style={styles.detailCard}>
               <Detail label="Description" value={expense.description} />
@@ -102,6 +105,7 @@ const styles = StyleSheet.create({
     fontSize: 21,
     fontWeight: '700',
   },
+  headerLogo: { marginLeft: 'auto' },
   content: {
     padding: 22,
     paddingBottom: 36,

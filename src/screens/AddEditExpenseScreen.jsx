@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Platform, Pressable, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native';
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import AppIcon from '../components/AppIcon';
+import BrandMark from '../components/BrandMark';
 import { useBudget } from '../context/BudgetContext';
 import { colors } from '../theme/expenseTrackerTheme';
 import styles from './addEditExpenseStyles';
@@ -28,7 +29,7 @@ export default function AddEditExpenseScreen({ navigation, route }) {
 
   // TextInputs keep text while the user types. We convert amount when saving.
   const [amount, setAmount] = useState(expenseToEdit ? String(expenseToEdit.amount) : '');
-  const [category, setCategory] = useState(expenseToEdit?.category || 'Transport');
+  const [category, setCategory] = useState(expenseToEdit?.category || '');
   const [date, setDate] = useState(() => dateFromStorage(expenseToEdit?.date));
   const [description, setDescription] = useState(expenseToEdit?.description || '');
   const [showCategories, setShowCategories] = useState(false);
@@ -58,6 +59,10 @@ export default function AddEditExpenseScreen({ navigation, route }) {
     }
     if (!description.trim()) {
       setError('Enter a description.');
+      return;
+    }
+    if (!category) {
+      setError('Choose a category.');
       return;
     }
 
@@ -90,6 +95,7 @@ export default function AddEditExpenseScreen({ navigation, route }) {
             <AppIcon name="back" color={colors.text} size={22} />
           </Pressable>
           <Text style={styles.title}>{expenseToEdit ? 'Edit expense' : 'Add expense'}</Text>
+          <View style={styles.headerLogo}><BrandMark /></View>
         </View>
 
         <ScrollView
@@ -100,7 +106,7 @@ export default function AddEditExpenseScreen({ navigation, route }) {
         >
           <Text style={styles.label}>Amount</Text>
           <View style={styles.amountBox}>
-            <Text style={styles.currencySymbol}>$</Text>
+            <Text style={styles.currencySymbol}>₱</Text>
             <TextInput
               accessibilityLabel="Amount"
               style={styles.amount}
@@ -119,7 +125,9 @@ export default function AddEditExpenseScreen({ navigation, route }) {
             onPress={() => setShowCategories((current) => !current)}
             style={[styles.field, styles.selectedField]}
           >
-            <Text style={styles.fieldText}>{category}</Text>
+            <Text style={[styles.fieldText, !category && styles.placeholder]}>
+              {category || 'Choose a category'}
+            </Text>
             <AppIcon name="dropdown" color={colors.text} />
           </Pressable>
           {showCategories && (

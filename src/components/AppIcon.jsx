@@ -5,6 +5,9 @@ import { Text, View } from 'react-native';
 const symbols = {
   food: '🍴',
   transport: '🚌',
+  shopping: '🛍️',
+  bills: '🧾',
+  tag: '🏷️',
   home: '⌂',
   history: '≡',
   add: '+',
@@ -13,6 +16,12 @@ const symbols = {
   calendar: '▣',
   dropdown: '▾',
 };
+const categoryIcons = { Food: 'food', Transport: 'transport', Shopping: 'shopping', Bills: 'bills' };
+
+// Custom category names use a tag, so they always have an icon too.
+export function categoryIconName(category) {
+  return categoryIcons[category] || 'tag';
+}
 
 export default function AppIcon({ name, color, size = 20 }) {
   // The fixed box keeps different symbols centered in the same space.

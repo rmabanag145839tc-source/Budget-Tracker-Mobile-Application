@@ -33,6 +33,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginLeft: 8,
   },
+  headerLogo: { marginLeft: 'auto' },
   form: {
     paddingHorizontal: 22,
     paddingTop: 14,
@@ -89,6 +90,7 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: 16,
   },
+  placeholder: { color: colors.mutedText },
   categoryChoices: {
     backgroundColor: colors.input,
     borderWidth: 1,

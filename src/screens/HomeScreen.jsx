@@ -3,11 +3,12 @@ import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'rea
 import BottomTabs from '../components/BottomTabs';
 import ExpenseRow from '../components/ExpenseRow';
 import SafetyGauge from '../components/SafetyGauge';
-import AppIcon from '../components/AppIcon';
+import AppIcon, { categoryIconName } from '../components/AppIcon';
+import BrandMark from '../components/BrandMark';
 import { useBudget } from '../context/BudgetContext';
 import { colors } from '../theme/expenseTrackerTheme';
+import { formatPeso } from '../utils/formatPeso';
 
-const categoryIcons = { Food: 'food', Transport: 'transport' };
 const categoryColors = { Food: colors.coral, Transport: colors.blue };
 
 export default function HomeScreen({ navigation }) {
@@ -17,16 +18,14 @@ export default function HomeScreen({ navigation }) {
 
   // Only expenses dated this month change the monthly budget figures.
   const monthlyExpenses = expenses.filter((expense) => expense.date.startsWith(thisMonth));
-  // Keep the mockup's two cards; show any other category after it has spending this month.
-  const dashboardCategories = categories.filter(
-    (name) =>
-      name === 'Food' ||
-      name === 'Transport' ||
-      monthlyExpenses.some((expense) => expense.category === name)
+  // A category appears on Home once it has an expense this month.
+  const dashboardCategories = categories.filter((name) =>
+    monthlyExpenses.some((expense) => expense.category === name)
   );
   const monthlySpending = monthlyExpenses.reduce((total, expense) => total + expense.amount, 0);
   const remaining = monthlyBudget - monthlySpending;
-  let safetyScore = Math.round((remaining / monthlyBudget) * 100);
+  const hasBudget = monthlyBudget > 0;
+  let safetyScore = hasBudget ? Math.round((remaining / monthlyBudget) * 100) : 0;
   if (safetyScore < 0) {
     safetyScore = 0;
   }
@@ -59,54 +58,63 @@ export default function HomeScreen({ navigation }) {
                 <Text style={styles.editBudget}>Edit budget</Text>
               </Pressable>
             </View>
-            <Text style={styles.name}>Your budget</Text>
+            <View style={styles.brandRow}>
+              <BrandMark size={30} />
+              <Text style={styles.name}>Expense Tracker</Text>
+            </View>
             <Text style={styles.balanceLabel}>Remaining balance</Text>
             <Text style={[styles.balance, remaining < 0 && styles.negativeBalance]}>
-              {remaining < 0 ? '-' : ''}${Math.abs(remaining).toFixed(2)}
+              {formatPeso(remaining)}
             </Text>
             <View style={styles.balanceSummary}>
               <View>
                 <Text style={styles.summaryLabel}>BUDGET</Text>
-                <Text style={styles.summaryValue}>${monthlyBudget.toFixed(2)}</Text>
+                <Text style={styles.summaryValue}>{formatPeso(monthlyBudget)}</Text>
               </View>
               <View>
                 <Text style={styles.summaryLabel}>SPENT</Text>
-                <Text style={styles.summaryValue}>${monthlySpending.toFixed(2)}</Text>
+                <Text style={styles.summaryValue}>{formatPeso(monthlySpending)}</Text>
               </View>
             </View>
           </View>
 
           <View style={styles.dashboard}>
             <View style={styles.safetyCard}>
-              <SafetyGauge percent={safetyScore} />
+              <SafetyGauge percent={safetyScore} noBudget={!hasBudget} />
               <View>
-                <Text style={[styles.safetyTitle, safetyScore < 30 && styles.lowBudget]}>
-                  {safetyScore >= 30 ? 'Budget safe' : 'Budget low'}
+                <Text style={[styles.safetyTitle, hasBudget && safetyScore < 30 && styles.lowBudget]}>
+                  {!hasBudget ? 'Set your budget' : safetyScore >= 30 ? 'Budget safe' : 'Budget low'}
                 </Text>
                 <Text style={styles.smallText}>
-                  {safetyScore >= 30 ? "You're on track" : 'Watch your spending'}
+                  {!hasBudget
+                    ? 'Tap Edit budget to begin'
+                    : safetyScore >= 30 ? "You're on track" : 'Watch your spending'}
                 </Text>
               </View>
             </View>
 
             <Text style={styles.sectionTitle}>This month by category</Text>
-            <View style={styles.categoryRow}>
-              {dashboardCategories.map((name) => (
-                <View key={name} style={styles.categoryCard}>
-                  <View style={styles.categoryIcon}>
-                    <AppIcon
-                      name={categoryIcons[name] || 'categories'}
-                      color={categoryColors[name] || colors.green}
-                      size={18}
-                    />
+            {dashboardCategories.length === 0 ? (
+              <Text style={styles.emptyCategory}>Categories appear here after you add an expense.</Text>
+            ) : (
+              <View style={styles.categoryRow}>
+                {dashboardCategories.map((name) => (
+                  <View key={name} style={styles.categoryCard}>
+                    <View style={styles.categoryIcon}>
+                      <AppIcon
+                        name={categoryIconName(name)}
+                        color={categoryColors[name] || colors.green}
+                        size={18}
+                      />
+                    </View>
+                    <Text style={styles.categoryName} numberOfLines={1}>
+                      {name}
+                    </Text>
+                    <Text style={styles.categoryAmount}>{formatPeso(categoryTotal(name))}</Text>
                   </View>
-                  <Text style={styles.categoryName} numberOfLines={1}>
-                    {name}
-                  </Text>
-                  <Text style={styles.categoryAmount}>${categoryTotal(name).toFixed(2)}</Text>
-                </View>
-              ))}
-            </View>
+                ))}
+              </View>
+            )}
 
             <Text style={styles.sectionTitle}>Recent activity</Text>
             {expenses.length === 0 ? (
@@ -161,11 +169,11 @@ const styles = StyleSheet.create({
   },
   topRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   editBudget: { color: colors.green, fontSize: 12, fontWeight: '700' },
+  brandRow: { flexDirection: 'row', alignItems: 'center', gap: 9, marginTop: 9 },
   name: {
     color: colors.text,
     fontSize: 20,
     fontWeight: '700',
-    marginTop: 5,
   },
   balanceLabel: {
     color: colors.mutedText,
@@ -242,6 +250,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 24,
   },
+  emptyCategory: { color: colors.mutedText, fontSize: 13, marginTop: 10, marginBottom: 20 },
   categoryCard: {
     width: 124,
     minHeight: 112,

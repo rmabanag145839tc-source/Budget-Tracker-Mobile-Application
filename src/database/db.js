@@ -4,7 +4,7 @@ import * as SQLite from 'expo-sqlite';
 const db = SQLite.openDatabaseSync('expensetracker.db');
 
 export const STARTING_CATEGORIES = ['Food', 'Transport', 'Shopping', 'Bills'];
-export const STARTING_MONTHLY_BUDGET = 1000;
+export const STARTING_MONTHLY_BUDGET = 0;
 
 let isReady = false;
 

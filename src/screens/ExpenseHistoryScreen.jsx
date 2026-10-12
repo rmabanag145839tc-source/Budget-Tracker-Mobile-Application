@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FlatList, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import BottomTabs from '../components/BottomTabs';
+import BrandMark from '../components/BrandMark';
 import ExpenseRow from '../components/ExpenseRow';
 import { useBudget } from '../context/BudgetContext';
 import { colors } from '../theme/expenseTrackerTheme';
@@ -19,10 +20,13 @@ export default function ExpenseHistoryScreen({ navigation }) {
     <SafeAreaView style={styles.screen}>
       <View style={styles.phone}>
         <View style={styles.header}>
-          <Text style={styles.title}>Expense history</Text>
-          <Text style={styles.subtitle}>
-            {expenses.length === 1 ? '1 expense recorded' : `${expenses.length} expenses recorded`}
-          </Text>
+          <View>
+            <Text style={styles.title}>Expense history</Text>
+            <Text style={styles.subtitle}>
+              {expenses.length === 1 ? '1 expense recorded' : `${expenses.length} expenses recorded`}
+            </Text>
+          </View>
+          <BrandMark />
         </View>
 
         <ScrollView
@@ -87,6 +91,9 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: colors.navy,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 22,
     paddingTop: 22,
     paddingBottom: 24,

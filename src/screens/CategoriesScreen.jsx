@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Alert, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import BottomTabs from '../components/BottomTabs';
+import BrandMark from '../components/BrandMark';
+import AppIcon, { categoryIconName } from '../components/AppIcon';
 import { startingCategories, useBudget } from '../context/BudgetContext';
 import { colors } from '../theme/expenseTrackerTheme';
 
@@ -83,8 +85,11 @@ export default function CategoriesScreen({ navigation }) {
     <SafeAreaView style={styles.screen}>
       <View style={styles.phone}>
         <View style={styles.header}>
-          <Text style={styles.title}>Categories</Text>
-          <Text style={styles.subtitle}>Keep your spending organized</Text>
+          <View>
+            <Text style={styles.title}>Categories</Text>
+            <Text style={styles.subtitle}>Keep your spending organized</Text>
+          </View>
+          <BrandMark />
         </View>
 
         <ScrollView
@@ -121,6 +126,9 @@ export default function CategoriesScreen({ navigation }) {
 
             return (
               <View key={name} style={styles.categoryRow}>
+                <View style={styles.categoryIcon}>
+                  <AppIcon name={categoryIconName(name)} color={colors.green} size={18} />
+                </View>
                 {editingName === name ? (
                   <TextInput
                     accessibilityLabel="Edit category name"
@@ -190,6 +198,9 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: colors.navy,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 22,
     paddingTop: 22,
     paddingBottom: 24,
@@ -242,6 +253,14 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingHorizontal: 14,
     marginTop: 8,
+  },
+  categoryIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: colors.navy,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   categoryName: {
     color: colors.text,

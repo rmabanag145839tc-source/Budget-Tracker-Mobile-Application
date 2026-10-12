@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import AppIcon from '../components/AppIcon';
+import BrandMark from '../components/BrandMark';
 import { useBudget } from '../context/BudgetContext';
 import { colors } from '../theme/expenseTrackerTheme';
 
@@ -11,8 +12,8 @@ export default function BudgetSettingsScreen({ navigation }) {
 
   function handleSave() {
     const newBudget = Number(amount);
-    if (!Number.isFinite(newBudget) || newBudget <= 0) {
-      setError('Enter a budget greater than zero.');
+    if (!amount.trim() || !Number.isFinite(newBudget) || newBudget < 0) {
+      setError('Enter zero or a positive budget.');
       return;
     }
 
@@ -33,6 +34,7 @@ export default function BudgetSettingsScreen({ navigation }) {
             <AppIcon name="back" color={colors.text} size={22} />
           </Pressable>
           <Text style={styles.title}>Monthly budget</Text>
+          <View style={styles.headerLogo}><BrandMark /></View>
         </View>
 
         <ScrollView
@@ -41,17 +43,17 @@ export default function BudgetSettingsScreen({ navigation }) {
           keyboardDismissMode="on-drag"
           automaticallyAdjustKeyboardInsets
         >
-          <Text style={styles.help}>Set the amount you want to spend this month.</Text>
+          <Text style={styles.help}>Set the amount you want to spend this month. You can enter zero to clear it.</Text>
           <Text style={styles.label}>Budget amount</Text>
           <View style={styles.inputRow}>
-            <Text style={styles.currency}>$</Text>
+            <Text style={styles.currency}>₱</Text>
             <TextInput
               accessibilityLabel="Monthly budget amount"
               style={styles.input}
               value={amount}
               onChangeText={setAmount}
               keyboardType="decimal-pad"
-              placeholder="1000.00"
+              placeholder="0.00"
               placeholderTextColor={colors.mutedText}
             />
           </View>
@@ -77,6 +79,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   title: { color: colors.text, fontSize: 21, fontWeight: '700' },
+  headerLogo: { marginLeft: 'auto' },
   content: { padding: 22 },
   help: { color: colors.mutedText, fontSize: 14, marginBottom: 28 },
   label: { color: colors.mutedText, fontSize: 13, marginBottom: 8 },

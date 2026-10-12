@@ -1,6 +1,6 @@
 # Personal Expense Budget Tracker
 
-A mobile app for recording expenses and checking how much of a monthly budget remains. Built for the CS15L React Native final project.
+A mobile app for recording expenses in Philippine pesos and checking how much of a monthly budget remains. Built for the CS15L React Native final project.
 
 ## Team
 
@@ -27,7 +27,7 @@ Expo SDK 57, React Native, JSX, React Navigation, `expo-sqlite`, and `@react-nat
 3. Run `npx expo start` and open the app on a compatible device or emulator.
 4. Run `npm run lint` to check the JavaScript and JSX files.
 
-The app stores data in a SQLite file on the device. Each installation has its own data; uninstalling the app removes that installation's local database. No account or internet connection is needed for expense entry.
+The app stores data in a SQLite file on the device. Each installation has its own data; uninstalling the app removes that installation's local database. No account or internet connection is needed for expense entry. New installations start with a ₱0 budget; existing saved budgets stay as they are and can be changed in Budget Settings.
 
 ## How the files work together
 
