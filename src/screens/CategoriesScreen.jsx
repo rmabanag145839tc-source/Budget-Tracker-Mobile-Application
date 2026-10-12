@@ -30,8 +30,13 @@ export default function CategoriesScreen({ navigation }) {
       return;
     }
 
-    addCategory(name);
-    setNewName('');
+    try {
+      addCategory(name);
+      setNewName('');
+    } catch (error) {
+      console.error('Category add failed:', error);
+      Alert.alert('Could not add category', 'Please try another name.');
+    }
   }
 
   function handleRename() {
@@ -42,8 +47,13 @@ export default function CategoriesScreen({ navigation }) {
     }
 
     // Renaming also changes the category on any expenses that used it.
-    renameCategory(editingName, name);
-    setEditingName('');
+    try {
+      renameCategory(editingName, name);
+      setEditingName('');
+    } catch (error) {
+      console.error('Category rename failed:', error);
+      Alert.alert('Could not rename category', 'Please try another name.');
+    }
   }
 
   function handleDelete(name) {
@@ -54,7 +64,18 @@ export default function CategoriesScreen({ navigation }) {
 
     Alert.alert('Delete category?', name, [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: () => deleteCategory(name) },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => {
+          try {
+            deleteCategory(name);
+          } catch (error) {
+            console.error('Category delete failed:', error);
+            Alert.alert('Could not delete category', 'Please try again.');
+          }
+        },
+      },
     ]);
   }
 

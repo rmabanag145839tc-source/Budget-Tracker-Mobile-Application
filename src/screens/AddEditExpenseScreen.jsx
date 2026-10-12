@@ -40,7 +40,9 @@ export default function AddEditExpenseScreen({ navigation, route }) {
       DateTimePickerAndroid.open({
         value: date,
         mode: 'date',
-        onValueChange: (_, chosenDate) => setDate(chosenDate),
+        onValueChange: (_, chosenDate) => {
+          if (chosenDate) setDate(chosenDate);
+        },
       });
     } else {
       setShowDatePicker(true);
@@ -59,15 +61,20 @@ export default function AddEditExpenseScreen({ navigation, route }) {
       return;
     }
 
-    // Saving updates the shared React state, so the other screens refresh.
-    saveExpense({
-      id: expenseToEdit?.id,
-      amount: numberAmount,
-      category,
-      date: dateForStorage(date),
-      description: description.trim(),
-    });
-    navigation.goBack();
+    try {
+      // Save to SQLite, then refresh the shared state used by the other screens.
+      saveExpense({
+        id: expenseToEdit?.id,
+        amount: numberAmount,
+        category,
+        date: dateForStorage(date),
+        description: description.trim(),
+      });
+      navigation.goBack();
+    } catch (saveError) {
+      console.error('Expense save failed:', saveError);
+      setError('Could not save the expense. Check the category and try again.');
+    }
   }
 
   return (
@@ -151,7 +158,9 @@ export default function AddEditExpenseScreen({ navigation, route }) {
                 mode="date"
                 display="inline"
                 themeVariant="dark"
-                onValueChange={(_, chosenDate) => setDate(chosenDate)}
+                onValueChange={(_, chosenDate) => {
+                  if (chosenDate) setDate(chosenDate);
+                }}
               />
               <Pressable onPress={() => setShowDatePicker(false)} style={styles.dateDoneButton}>
                 <Text style={styles.dateDoneText}>Done</Text>

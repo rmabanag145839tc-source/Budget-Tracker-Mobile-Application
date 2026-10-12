@@ -1,5 +1,5 @@
 import React from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import BottomTabs from '../components/BottomTabs';
 import ExpenseRow from '../components/ExpenseRow';
 import SafetyGauge from '../components/SafetyGauge';
@@ -49,7 +49,16 @@ export default function HomeScreen({ navigation }) {
       <View style={styles.phone}>
         <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
           <View style={styles.balanceCard}>
-            <Text style={styles.eyebrow}>MONTHLY OVERVIEW</Text>
+            <View style={styles.topRow}>
+              <Text style={styles.eyebrow}>MONTHLY OVERVIEW</Text>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Edit monthly budget"
+                onPress={() => navigation.navigate('BudgetSettings')}
+              >
+                <Text style={styles.editBudget}>Edit budget</Text>
+              </Pressable>
+            </View>
             <Text style={styles.name}>Your budget</Text>
             <Text style={styles.balanceLabel}>Remaining balance</Text>
             <Text style={[styles.balance, remaining < 0 && styles.negativeBalance]}>
@@ -150,6 +159,8 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 1.6,
   },
+  topRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  editBudget: { color: colors.green, fontSize: 12, fontWeight: '700' },
   name: {
     color: colors.text,
     fontSize: 20,

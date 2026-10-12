@@ -9,14 +9,19 @@ export default function ExpenseDetailsScreen({ navigation, route }) {
   const expense = expenses.find((item) => item.id === route.params?.expenseId);
 
   function confirmDelete() {
-    Alert.alert('Delete expense?', 'This removes it from the current app session.', [
+    Alert.alert('Delete expense?', 'This permanently removes the saved expense.', [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Delete',
         style: 'destructive',
         onPress: () => {
-          deleteExpense(expense.id);
-          navigation.goBack();
+          try {
+            deleteExpense(expense.id);
+            navigation.goBack();
+          } catch (error) {
+            console.error('Expense delete failed:', error);
+            Alert.alert('Could not delete expense', 'Please try again.');
+          }
         },
       },
     ]);

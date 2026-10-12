@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import BottomTabs from '../components/BottomTabs';
 import ExpenseRow from '../components/ExpenseRow';
 import { useBudget } from '../context/BudgetContext';
@@ -45,8 +45,17 @@ export default function ExpenseHistoryScreen({ navigation }) {
           ))}
         </ScrollView>
 
-        <ScrollView style={styles.list}>
-          {visibleExpenses.length === 0 ? (
+        <FlatList
+          style={styles.list}
+          data={visibleExpenses}
+          keyExtractor={(expense) => String(expense.id)}
+          renderItem={({ item }) => (
+            <ExpenseRow
+              expense={item}
+              onPress={() => navigation.navigate('ExpenseDetails', { expenseId: item.id })}
+            />
+          )}
+          ListEmptyComponent={
             <View style={styles.emptyCard}>
               <Text style={styles.emptyTitle}>Nothing to show yet</Text>
               <Text style={styles.emptyText}>
@@ -55,16 +64,8 @@ export default function ExpenseHistoryScreen({ navigation }) {
                   : 'Try another category to see its expenses.'}
               </Text>
             </View>
-          ) : (
-            visibleExpenses.map((expense) => (
-              <ExpenseRow
-                key={expense.id}
-                expense={expense}
-                onPress={() => navigation.navigate('ExpenseDetails', { expenseId: expense.id })}
-              />
-            ))
-          )}
-        </ScrollView>
+          }
+        />
 
         <BottomTabs navigation={navigation} currentScreen="History" />
       </View>

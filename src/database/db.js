@@ -41,12 +41,16 @@ export function initDatabase() {
       CREATE INDEX IF NOT EXISTS idx_transactions_category ON transactions (category_id);
     `);
 
-    // Seed only when the table is empty, so a deleted starter category stays deleted.
-    const { count } = db.getFirstSync('SELECT COUNT(*) AS count FROM categories');
-    if (count === 0) {
-      STARTING_CATEGORIES.forEach((name) => {
-        db.runSync('INSERT INTO categories (name) VALUES (?)', [name]);
-      });
+    // The marker keeps an intentionally empty category list empty on later launches.
+    const seeded = db.getFirstSync("SELECT value FROM settings WHERE key = 'categories_seeded'");
+    if (!seeded) {
+      const { count } = db.getFirstSync('SELECT COUNT(*) AS count FROM categories');
+      if (count === 0) {
+        STARTING_CATEGORIES.forEach((name) => {
+          db.runSync('INSERT INTO categories (name) VALUES (?)', [name]);
+        });
+      }
+      db.runSync("INSERT INTO settings (key, value) VALUES ('categories_seeded', '1')");
     }
 
     db.runSync("INSERT OR IGNORE INTO settings (key, value) VALUES ('monthly_budget', ?)", [
