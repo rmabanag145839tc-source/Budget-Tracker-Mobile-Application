@@ -22,6 +22,7 @@ const BudgetContext = createContext(null);
 
 export const startingCategories = STARTING_CATEGORIES;
 
+// Read the saved records together so every screen receives the latest values.
 function readSavedData() {
   initDatabase();
   return {
@@ -58,6 +59,7 @@ export function BudgetProvider({ children }) {
   }
 
   function saveExpense(details) {
+    // The form uses a category name; the database stores its matching ID.
     const categoryId = getCategoryIdByName(details.category);
     if (!categoryId) throw new Error('Choose an available category.');
 
@@ -68,6 +70,7 @@ export function BudgetProvider({ children }) {
       categoryId,
     };
 
+    // An existing ID means edit; otherwise, create a new expense.
     if (details.id) {
       updateExpense({ id: details.id, ...record });
     } else {
@@ -92,6 +95,7 @@ export function BudgetProvider({ children }) {
   }
 
   function deleteCategory(name) {
+    // Keep expenses from pointing to a category that no longer exists.
     if (countExpensesInCategory(name) > 0) {
       throw new Error('Delete or edit its expenses first.');
     }
@@ -115,6 +119,7 @@ export function BudgetProvider({ children }) {
     );
   }
 
+  // Screens call useBudget() to read these values and save changes.
   return (
     <BudgetContext.Provider
       value={{

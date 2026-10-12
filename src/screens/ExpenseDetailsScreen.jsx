@@ -8,6 +8,7 @@ import { formatPeso } from '../utils/formatPeso';
 
 export default function ExpenseDetailsScreen({ navigation, route }) {
   const { expenses, deleteExpense } = useBudget();
+  // Look up the current saved expense by the ID passed from Home or History.
   const expense = expenses.find((item) => item.id === route.params?.expenseId);
 
   function confirmDelete() {
@@ -52,6 +53,7 @@ export default function ExpenseDetailsScreen({ navigation, route }) {
               <Detail label="Date" value={expense.date} />
             </View>
 
+            {/* Pass this ID to reuse the add form with the expense's current values. */}
             <Pressable
               accessibilityRole="button"
               onPress={() => navigation.push('AddExpense', { expenseId: expense.id })}

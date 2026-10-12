@@ -7,11 +7,13 @@ import { colors } from '../theme/expenseTrackerTheme';
 
 export default function BudgetSettingsScreen({ navigation }) {
   const { monthlyBudget, updateMonthlyBudget } = useBudget();
+  // Keep typing separate from the saved budget until Save is pressed.
   const [amount, setAmount] = useState(String(monthlyBudget));
   const [error, setError] = useState('');
 
   function handleSave() {
     const newBudget = Number(amount);
+    // Zero clears the budget; negative amounts and non-numbers are not valid.
     if (!amount.trim() || !Number.isFinite(newBudget) || newBudget < 0) {
       setError('Enter zero or a positive budget.');
       return;

@@ -2,6 +2,7 @@ import db from './db';
 
 // Every query returns the same shape the screens already use:
 // { id, amount, category, date, description }
+// The JOIN turns a saved category ID into the name shown in the app.
 const SELECT_EXPENSES = `
   SELECT t.id, t.amount, t.description, t.date, c.name AS category
     FROM transactions t

@@ -25,6 +25,7 @@ export default function HomeScreen({ navigation }) {
   const monthlySpending = monthlyExpenses.reduce((total, expense) => total + expense.amount, 0);
   const remaining = monthlyBudget - monthlySpending;
   const hasBudget = monthlyBudget > 0;
+  // The gauge shows 0–100% of the budget left; overspending cannot make it negative.
   let safetyScore = hasBudget ? Math.round((remaining / monthlyBudget) * 100) : 0;
   if (safetyScore < 0) {
     safetyScore = 0;
@@ -117,6 +118,7 @@ export default function HomeScreen({ navigation }) {
             )}
 
             <Text style={styles.sectionTitle}>Recent activity</Text>
+            {/* Recent activity uses all dates, while the budget above uses this month only. */}
             {expenses.length === 0 ? (
               <View style={styles.emptyCard}>
                 <Text style={styles.emptyTitle}>Nothing spent yet</Text>

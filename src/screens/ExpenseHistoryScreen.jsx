@@ -11,6 +11,7 @@ export default function ExpenseHistoryScreen({ navigation }) {
   const [filter, setFilter] = useState('All');
   // A renamed or deleted category should not leave the history stuck on an old filter.
   const selectedFilter = categories.includes(filter) ? filter : 'All';
+  // Filtering only changes what is shown; it does not change saved expenses.
   const visibleExpenses =
     selectedFilter === 'All'
       ? expenses
@@ -49,6 +50,7 @@ export default function ExpenseHistoryScreen({ navigation }) {
           ))}
         </ScrollView>
 
+        {/* FlatList handles long histories without drawing every row at once. */}
         <FlatList
           style={styles.list}
           data={visibleExpenses}

@@ -8,6 +8,7 @@ import { colors } from '../theme/expenseTrackerTheme';
 
 export default function CategoriesScreen({ navigation }) {
   const { categories, expenses, addCategory, renameCategory, deleteCategory } = useBudget();
+  // These fields are form drafts; the saved list comes from BudgetContext.
   const [newName, setNewName] = useState('');
   const [editingName, setEditingName] = useState('');
   const [draftName, setDraftName] = useState('');
@@ -122,6 +123,7 @@ export default function CategoriesScreen({ navigation }) {
 
           <Text style={styles.listTitle}>Your categories</Text>
           {categories.map((name) => {
+            // The starting categories stay available; custom ones can be renamed or removed.
             const isBuiltIn = startingCategories.includes(name);
 
             return (

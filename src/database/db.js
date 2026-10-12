@@ -12,6 +12,7 @@ let isReady = false;
 export function initDatabase() {
   if (isReady) return;
 
+  // Enforce the link between each expense and its category.
   db.execSync('PRAGMA foreign_keys = ON;');
 
   db.withTransactionSync(() => {
@@ -53,6 +54,7 @@ export function initDatabase() {
       db.runSync("INSERT INTO settings (key, value) VALUES ('categories_seeded', '1')");
     }
 
+    // Add the zero starting budget only when the user has not saved one yet.
     db.runSync("INSERT OR IGNORE INTO settings (key, value) VALUES ('monthly_budget', ?)", [
       String(STARTING_MONTHLY_BUDGET),
     ]);

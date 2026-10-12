@@ -17,6 +17,7 @@ function dateForStorage(date) {
 
 function dateFromStorage(savedDate) {
   if (!savedDate) return new Date();
+  // JavaScript months start at zero, so January in the saved date becomes month 0.
   const [year, month, day] = savedDate.split('-').map(Number);
   return new Date(year, month - 1, day);
 }
@@ -37,6 +38,7 @@ export default function AddEditExpenseScreen({ navigation, route }) {
   const [error, setError] = useState('');
 
   function openDatePicker() {
+    // Android opens its date dialog; iOS shows the picker in this form.
     if (Platform.OS === 'android') {
       DateTimePickerAndroid.open({
         value: date,
@@ -51,6 +53,7 @@ export default function AddEditExpenseScreen({ navigation, route }) {
   }
 
   function handleSave() {
+    // Inputs are text while typing, so check them before sending data to SQLite.
     const numberAmount = Number(amount);
 
     if (!Number.isFinite(numberAmount) || numberAmount <= 0) {
