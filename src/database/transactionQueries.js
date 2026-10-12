@@ -22,21 +22,6 @@ export function getAllExpenses() {
   return db.getAllSync(`${SELECT_EXPENSES} ORDER BY t.date DESC, t.id DESC`);
 }
 
-export function getExpensesByCategory(name) {
-  return db.getAllSync(`${SELECT_EXPENSES} WHERE c.name = ? ORDER BY t.date DESC, t.id DESC`, [
-    name,
-  ]);
-}
-
-// month is 'YYYY-MM'
-export function getMonthlyTotal(month) {
-  const row = db.getFirstSync(
-    "SELECT COALESCE(SUM(amount), 0) AS total FROM transactions WHERE strftime('%Y-%m', date) = ?",
-    [month]
-  );
-  return row.total;
-}
-
 // UPDATE
 export function updateExpense({ id, amount, description, date, categoryId }) {
   return db.runSync(
