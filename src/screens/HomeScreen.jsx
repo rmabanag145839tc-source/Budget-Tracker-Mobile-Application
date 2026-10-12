@@ -1,91 +1,124 @@
 import React from 'react';
-import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import BottomTabs from '../components/BottomTabs';
+import ExpenseRow from '../components/ExpenseRow';
+import SafetyGauge from '../components/SafetyGauge';
 import AppIcon from '../components/AppIcon';
+import { useBudget } from '../context/BudgetContext';
 import { colors } from '../theme/expenseTrackerTheme';
 
+const categoryIcons = { Food: 'food', Transport: 'transport' };
+const categoryColors = { Food: colors.coral, Transport: colors.blue };
+
 export default function HomeScreen({ navigation }) {
+  const { expenses, categories, monthlyBudget } = useBudget();
+  const today = new Date();
+  const thisMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+
+  // Only expenses dated this month change the monthly budget figures.
+  const monthlyExpenses = expenses.filter((expense) => expense.date.startsWith(thisMonth));
+  // Keep the mockup's two cards; show any other category after it has spending this month.
+  const dashboardCategories = categories.filter(
+    (name) =>
+      name === 'Food' ||
+      name === 'Transport' ||
+      monthlyExpenses.some((expense) => expense.category === name)
+  );
+  const monthlySpending = monthlyExpenses.reduce((total, expense) => total + expense.amount, 0);
+  const remaining = monthlyBudget - monthlySpending;
+  let safetyScore = Math.round((remaining / monthlyBudget) * 100);
+  if (safetyScore < 0) {
+    safetyScore = 0;
+  }
+  if (safetyScore > 100) {
+    safetyScore = 100;
+  }
+
+  function categoryTotal(name) {
+    let total = 0;
+    for (const expense of monthlyExpenses) {
+      if (expense.category === name) {
+        total += expense.amount;
+      }
+    }
+    return total;
+  }
+
   return (
     <SafeAreaView style={styles.screen}>
       <View style={styles.phone}>
-        <ScrollView showsVerticalScrollIndicator={false}>
-          {/* Balance at the top of the dashboard */}
+        <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
           <View style={styles.balanceCard}>
-            <Text style={styles.mutedText}>Good Morning</Text>
-            <Text style={styles.name}>John Doe</Text>
-            <Text style={[styles.mutedText, styles.balanceLabel]}>Remaining balance</Text>
-            <Text style={styles.balance}>$842.50</Text>
+            <Text style={styles.eyebrow}>MONTHLY OVERVIEW</Text>
+            <Text style={styles.name}>Your budget</Text>
+            <Text style={styles.balanceLabel}>Remaining balance</Text>
+            <Text style={[styles.balance, remaining < 0 && styles.negativeBalance]}>
+              {remaining < 0 ? '-' : ''}${Math.abs(remaining).toFixed(2)}
+            </Text>
+            <View style={styles.balanceSummary}>
+              <View>
+                <Text style={styles.summaryLabel}>BUDGET</Text>
+                <Text style={styles.summaryValue}>${monthlyBudget.toFixed(2)}</Text>
+              </View>
+              <View>
+                <Text style={styles.summaryLabel}>SPENT</Text>
+                <Text style={styles.summaryValue}>${monthlySpending.toFixed(2)}</Text>
+              </View>
+            </View>
           </View>
 
           <View style={styles.dashboard}>
-            {/* Budget safety ring */}
-            <View style={styles.safetyRow}>
-              <View style={styles.gauge}>
-                <Text style={styles.gaugeText}>78%</Text>
-              </View>
+            <View style={styles.safetyCard}>
+              <SafetyGauge percent={safetyScore} />
               <View>
-                <Text style={styles.safetyTitle}>Budget safe</Text>
-                <Text style={styles.smallText}>You&apos;re on track</Text>
+                <Text style={[styles.safetyTitle, safetyScore < 30 && styles.lowBudget]}>
+                  {safetyScore >= 30 ? 'Budget safe' : 'Budget low'}
+                </Text>
+                <Text style={styles.smallText}>
+                  {safetyScore >= 30 ? "You're on track" : 'Watch your spending'}
+                </Text>
               </View>
             </View>
 
-            {/* Example spending totals */}
+            <Text style={styles.sectionTitle}>This month by category</Text>
             <View style={styles.categoryRow}>
-              <View style={styles.categoryCard}>
-                <AppIcon name="food" color={colors.coral} />
-                <Text style={styles.categoryName}>Food</Text>
-                <Text style={styles.categoryAmount}>$210</Text>
-              </View>
-              <View style={styles.categoryCard}>
-                <AppIcon name="transport" color={colors.blue} />
-                <Text style={styles.categoryName}>Transport</Text>
-                <Text style={styles.categoryAmount}>$64</Text>
-              </View>
+              {dashboardCategories.map((name) => (
+                <View key={name} style={styles.categoryCard}>
+                  <View style={styles.categoryIcon}>
+                    <AppIcon
+                      name={categoryIcons[name] || 'categories'}
+                      color={categoryColors[name] || colors.green}
+                      size={18}
+                    />
+                  </View>
+                  <Text style={styles.categoryName} numberOfLines={1}>
+                    {name}
+                  </Text>
+                  <Text style={styles.categoryAmount}>${categoryTotal(name).toFixed(2)}</Text>
+                </View>
+              ))}
             </View>
 
-            {/* Example recent expenses */}
             <Text style={styles.sectionTitle}>Recent activity</Text>
-            <View style={styles.activityList}>
-              <ActivityRow icon="coffee" title="Coffee shop" amount="-$4.50" />
-              <ActivityRow icon="book" title="Textbook" amount="-$38.00" />
-            </View>
+            {expenses.length === 0 ? (
+              <View style={styles.emptyCard}>
+                <Text style={styles.emptyTitle}>Nothing spent yet</Text>
+                <Text style={styles.emptyText}>Tap + below to add your first expense.</Text>
+              </View>
+            ) : (
+              expenses.slice(0, 3).map((expense) => (
+                <ExpenseRow
+                  key={expense.id}
+                  expense={expense}
+                  onPress={() => navigation.navigate('ExpenseDetails', { expenseId: expense.id })}
+                />
+              ))
+            )}
           </View>
         </ScrollView>
-
-        {/* The plus button opens the add screen. The other tabs are visual placeholders. */}
-        <View style={styles.tabBar}>
-          <TabIcon name="home" color={colors.green} label="Home" />
-          <TabIcon name="history" color="#898d8e" label="History" />
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Add expense"
-            onPress={() => navigation.navigate('AddExpense')}
-            style={styles.tabButton}
-          >
-            <AppIcon name="add" color="#898d8e" size={23} />
-          </Pressable>
-          <TabIcon name="categories" color="#898d8e" label="Categories" />
-        </View>
+        <BottomTabs navigation={navigation} currentScreen="Home" />
       </View>
     </SafeAreaView>
-  );
-}
-
-function ActivityRow({ icon, title, amount }) {
-  // Reuse this row layout for each example expense.
-  return (
-    <View style={styles.activityRow}>
-      <AppIcon name={icon} color={colors.coral} size={19} />
-      <Text style={styles.activityName}>{title}</Text>
-      <Text style={styles.expenseAmount}>{amount}</Text>
-    </View>
-  );
-}
-
-function TabIcon({ name, color, label }) {
-  return (
-    <View accessibilityRole="image" accessibilityLabel={label} style={styles.tabButton}>
-      <AppIcon name={name} color={color} size={23} />
-    </View>
   );
 }
 
@@ -100,60 +133,83 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 430,
     backgroundColor: colors.card,
-    overflow: 'hidden',
+  },
+  scroll: {
+    flex: 1,
   },
   balanceCard: {
-    minHeight: 190,
+    minHeight: 230,
     backgroundColor: colors.navy,
-    padding: 20,
-    paddingBottom: 24,
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    paddingBottom: 28,
   },
-  mutedText: {
-    color: colors.mutedText,
-    fontSize: 14,
+  eyebrow: {
+    color: colors.green,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1.6,
   },
   name: {
     color: colors.text,
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '700',
+    marginTop: 5,
   },
   balanceLabel: {
-    marginTop: 12,
+    color: colors.mutedText,
+    fontSize: 14,
+    marginTop: 24,
   },
   balance: {
     color: colors.text,
-    fontSize: 31,
+    fontSize: 36,
     fontWeight: '700',
+    marginTop: 2,
+  },
+  negativeBalance: {
+    color: colors.coral,
+  },
+  balanceSummary: {
+    borderTopWidth: 1,
+    borderColor: colors.navyBorder,
+    flexDirection: 'row',
+    gap: 36,
+    marginTop: 22,
+    paddingTop: 14,
+  },
+  summaryLabel: {
+    color: colors.mutedText,
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 1,
+  },
+  summaryValue: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: '600',
+    marginTop: 3,
   },
   dashboard: {
-    flex: 1,
     backgroundColor: colors.card,
-    borderTopLeftRadius: 22,
-    borderTopRightRadius: 22,
-    marginTop: -1,
-    padding: 20,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    marginTop: -18,
+    paddingHorizontal: 20,
+    paddingTop: 24,
+    paddingBottom: 30,
   },
-  safetyRow: {
-    minHeight: 92,
+  safetyCard: {
+    minHeight: 112,
+    backgroundColor: colors.smallCard,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 18,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 16,
-  },
-  gauge: {
-    width: 86,
-    height: 86,
-    borderRadius: 43,
-    borderWidth: 7,
-    borderColor: colors.green,
-    borderLeftColor: '#323738',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  gaugeText: {
-    color: colors.green,
-    fontSize: 16,
-    fontWeight: '600',
+    gap: 20,
+    padding: 12,
   },
   safetyTitle: {
     color: colors.green,
@@ -161,72 +217,71 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 4,
   },
+  lowBudget: {
+    color: colors.coral,
+  },
   smallText: {
-    color: '#d2d4d5',
+    color: colors.mutedText,
     fontSize: 13,
   },
   categoryRow: {
     flexDirection: 'row',
-    gap: 8,
-    marginTop: 16,
-    marginBottom: 20,
+    flexWrap: 'wrap',
+    gap: 10,
+    marginTop: 10,
+    marginBottom: 24,
   },
   categoryCard: {
-    width: 80,
-    minHeight: 78,
+    width: 124,
+    minHeight: 112,
     backgroundColor: colors.smallCard,
-    borderRadius: 11,
-    padding: 10,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: 12,
     justifyContent: 'center',
   },
+  categoryIcon: {
+    width: 34,
+    height: 34,
+    backgroundColor: colors.navy,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
   categoryName: {
-    color: colors.text,
-    fontSize: 13,
+    color: colors.mutedText,
+    fontSize: 12,
   },
   categoryAmount: {
     color: colors.text,
-    fontSize: 13,
-    fontWeight: '600',
+    fontSize: 15,
+    fontWeight: '700',
+    marginTop: 2,
   },
   sectionTitle: {
-    color: '#d3d5d6',
-    fontSize: 14,
-    paddingBottom: 8,
+    color: colors.text,
+    fontSize: 15,
+    fontWeight: '700',
+    marginTop: 24,
   },
-  activityList: {
-    borderTopWidth: 1,
+  emptyCard: {
+    backgroundColor: colors.smallCard,
+    borderWidth: 1,
     borderColor: colors.border,
+    borderRadius: 16,
+    padding: 18,
+    marginTop: 12,
   },
-  activityRow: {
-    height: 39,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 9,
-    borderBottomWidth: 1,
-    borderColor: colors.border,
-  },
-  activityName: {
+  emptyTitle: {
     color: colors.text,
     fontSize: 14,
-    flex: 1,
+    fontWeight: '700',
   },
-  expenseAmount: {
-    color: colors.coral,
-    fontSize: 14,
-  },
-  tabBar: {
-    height: 56,
-    borderTopWidth: 1,
-    borderColor: colors.border,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-    backgroundColor: '#1d1e1e',
-  },
-  tabButton: {
-    width: '25%',
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
+  emptyText: {
+    color: colors.mutedText,
+    fontSize: 13,
+    marginTop: 5,
   },
 });
