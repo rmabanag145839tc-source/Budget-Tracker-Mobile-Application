@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import AppIcon from './AppIcon';
 import { colors } from '../theme/expenseTrackerTheme';
 
@@ -7,6 +7,7 @@ const tabs = [
   { screen: 'Home', icon: 'home', label: 'Home' },
   { screen: 'History', icon: 'history', label: 'History' },
   { screen: 'AddExpense', icon: 'add', label: 'Add expense' },
+  { screen: 'Analytics', icon: 'analytics', label: 'Analytics' },
   { screen: 'Categories', icon: 'categories', label: 'Categories' },
 ];
 
@@ -36,6 +37,7 @@ export default function BottomTabs({ navigation, currentScreen }) {
             color={currentScreen === tab.screen ? colors.green : colors.mutedText}
             size={23}
           />
+          <Text style={[styles.label, currentScreen === tab.screen && styles.activeLabel]}>{tab.label}</Text>
         </Pressable>
       ))}
     </View>
@@ -44,7 +46,7 @@ export default function BottomTabs({ navigation, currentScreen }) {
 
 const styles = StyleSheet.create({
   bar: {
-    height: 60,
+    height: 70,
     borderTopWidth: 1,
     borderColor: colors.border,
     flexDirection: 'row',
@@ -55,6 +57,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  label: { color: colors.mutedText, fontSize: 10, marginTop: 2 },
+  activeLabel: { color: colors.green },
   activeMark: {
     position: 'absolute',
     top: 0,

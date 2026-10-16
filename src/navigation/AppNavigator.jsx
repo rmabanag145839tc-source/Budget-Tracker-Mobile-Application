@@ -7,6 +7,7 @@ import ExpenseHistoryScreen from '../screens/ExpenseHistoryScreen';
 import ExpenseDetailsScreen from '../screens/ExpenseDetailsScreen';
 import CategoriesScreen from '../screens/CategoriesScreen';
 import BudgetSettingsScreen from '../screens/BudgetSettingsScreen';
+import AnalyticsScreen from '../screens/AnalyticsScreen';
 import { colors } from '../theme/expenseTrackerTheme';
 
 const Stack = createNativeStackNavigator();
@@ -41,6 +42,7 @@ export default function AppNavigator() {
         <Stack.Screen name="ExpenseDetails" component={ExpenseDetailsScreen} />
         <Stack.Screen name="Categories" component={CategoriesScreen} />
         <Stack.Screen name="BudgetSettings" component={BudgetSettingsScreen} />
+        <Stack.Screen name="Analytics" component={AnalyticsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

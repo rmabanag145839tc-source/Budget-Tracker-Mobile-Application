@@ -8,11 +8,12 @@ import BrandMark from '../components/BrandMark';
 import { useBudget } from '../context/BudgetContext';
 import { colors } from '../theme/expenseTrackerTheme';
 import { formatPeso } from '../utils/formatPeso';
+import { roundMoney, totalExpenses } from '../utils/budgetMath';
 
 const categoryColors = { Food: colors.coral, Transport: colors.blue };
 
 export default function HomeScreen({ navigation }) {
-  const { expenses, categories, monthlyBudget } = useBudget();
+  const { expenses, categories, monthlyBudget, savingsGoal } = useBudget();
   const today = new Date();
   const thisMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
 
@@ -22,8 +23,8 @@ export default function HomeScreen({ navigation }) {
   const dashboardCategories = categories.filter((name) =>
     monthlyExpenses.some((expense) => expense.category === name)
   );
-  const monthlySpending = monthlyExpenses.reduce((total, expense) => total + expense.amount, 0);
-  const remaining = monthlyBudget - monthlySpending;
+  const monthlySpending = totalExpenses(monthlyExpenses);
+  const remaining = roundMoney(monthlyBudget - monthlySpending);
   const hasBudget = monthlyBudget > 0;
   // The gauge shows 0–100% of the budget left; overspending cannot make it negative.
   let safetyScore = hasBudget ? Math.round((remaining / monthlyBudget) * 100) : 0;
@@ -41,7 +42,7 @@ export default function HomeScreen({ navigation }) {
         total += expense.amount;
       }
     }
-    return total;
+    return roundMoney(total);
   }
 
   return (
@@ -56,9 +57,10 @@ export default function HomeScreen({ navigation }) {
                 accessibilityLabel="Edit monthly budget"
                 onPress={() => navigation.navigate('BudgetSettings')}
               >
-                <Text style={styles.editBudget}>Edit budget</Text>
+                <Text style={styles.editBudget}>Budget & goal</Text>
               </Pressable>
             </View>
+
             <View style={styles.brandRow}>
               <BrandMark size={30} />
               <Text style={styles.name}>Expense Tracker</Text>
@@ -88,11 +90,36 @@ export default function HomeScreen({ navigation }) {
                 </Text>
                 <Text style={styles.smallText}>
                   {!hasBudget
-                    ? 'Tap Edit budget to begin'
+                    ? 'Tap Budget & goal to begin'
                     : safetyScore >= 30 ? "You're on track" : 'Watch your spending'}
                 </Text>
               </View>
             </View>
+
+            {/* This is a goal for the money left over, not a separate savings account. */}
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => navigation.navigate('BudgetSettings')}
+              style={styles.emptyCard}
+            >
+              <Text style={styles.emptyTitle}>Monthly savings goal</Text>
+              <Text style={styles.emptyText}>
+                {savingsGoal > 0
+                  ? `Keep ${formatPeso(savingsGoal)} of your budget at month end.`
+                  : 'Set an amount you want to keep at month end.'}
+              </Text>
+              {savingsGoal > 0 && (
+                <>
+                  <Text style={styles.emptyText}>Amount left now: {formatPeso(remaining)}</Text>
+                  <Text style={[styles.goalStatus, remaining < savingsGoal && styles.lowBudget]}>
+                    {remaining >= savingsGoal
+                      ? 'On track — keep your remaining balance above your goal.'
+                      : `${formatPeso(roundMoney(savingsGoal - remaining))} below your goal.`}
+                  </Text>
+                </>
+              )}
+              <Text style={styles.editBudget}>Manage goal →</Text>
+            </Pressable>
 
             <Text style={styles.sectionTitle}>This month by category</Text>
             {dashboardCategories.length === 0 ? (
@@ -306,4 +333,5 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginTop: 5,
   },
+  goalStatus: { color: colors.green, fontSize: 13, lineHeight: 20, marginVertical: 10 },
 });

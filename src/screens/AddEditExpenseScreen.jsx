@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { Platform, Pressable, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native';
+import { Alert, Platform, Pressable, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native';
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import AppIcon from '../components/AppIcon';
 import BrandMark from '../components/BrandMark';
 import { useBudget } from '../context/BudgetContext';
 import { colors } from '../theme/expenseTrackerTheme';
 import styles from './addEditExpenseStyles';
+import { availableForExpense, roundMoney } from '../utils/budgetMath';
+import { formatPeso } from '../utils/formatPeso';
 
 function dateForStorage(date) {
   // Expenses store dates as YYYY-MM-DD so monthly totals are easy to calculate.
@@ -23,7 +25,7 @@ function dateFromStorage(savedDate) {
 }
 
 export default function AddEditExpenseScreen({ navigation, route }) {
-  const { expenses, categories, saveExpense } = useBudget();
+  const { expenses, categories, monthlyBudget, saveExpense } = useBudget();
   const expenseId = route.params?.expenseId;
   // An ID means we are editing. Without one, this is a new expense.
   const expenseToEdit = expenses.find((expense) => expense.id === expenseId);
@@ -36,6 +38,7 @@ export default function AddEditExpenseScreen({ navigation, route }) {
   const [showCategories, setShowCategories] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [error, setError] = useState('');
+  const available = availableForExpense(expenses, monthlyBudget, dateForStorage(date), expenseId);
 
   function openDatePicker() {
     // Android opens its date dialog; iOS shows the picker in this form.
@@ -56,8 +59,8 @@ export default function AddEditExpenseScreen({ navigation, route }) {
     // Inputs are text while typing, so check them before sending data to SQLite.
     const numberAmount = Number(amount);
 
-    if (!Number.isFinite(numberAmount) || numberAmount <= 0) {
-      setError('Enter an amount greater than zero.');
+    if (!Number.isFinite(numberAmount) || roundMoney(numberAmount) <= 0) {
+      setError('Enter an amount of at least ₱0.01.');
       return;
     }
     if (!description.trim()) {
@@ -80,6 +83,21 @@ export default function AddEditExpenseScreen({ navigation, route }) {
       });
       navigation.goBack();
     } catch (saveError) {
+      if (saveError.code === 'INSUFFICIENT_BALANCE') {
+        setError(saveError.message);
+        Alert.alert('Insufficient balance', saveError.message, [
+          { text: 'Keep editing', style: 'cancel' },
+          // Opening settings keeps this form in the stack, so typed details are preserved.
+          {
+            text: 'Add funds',
+            onPress: () => {
+              setError('');
+              navigation.navigate('BudgetSettings');
+            },
+          },
+        ]);
+        return;
+      }
       console.error('Expense save failed:', saveError);
       setError('Could not save the expense. Check the category and try again.');
     }
@@ -120,6 +138,19 @@ export default function AddEditExpenseScreen({ navigation, route }) {
               placeholderTextColor={colors.mutedText}
             />
           </View>
+          <Text style={styles.balanceHint}>
+            Available for {date.toLocaleDateString('en-PH', { month: 'long', year: 'numeric' })}: {formatPeso(available)}
+            {expenseToEdit ? ' (excluding this expense)' : ''}
+          </Text>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => {
+              setError('');
+              navigation.navigate('BudgetSettings');
+            }}
+          >
+            <Text style={styles.budgetLink}>Manage budget / add funds</Text>
+          </Pressable>
 
           <Text style={styles.label}>Category</Text>
           <Pressable

@@ -123,6 +123,8 @@ const styles = StyleSheet.create({
     color: colors.coral,
     marginTop: 12,
   },
+  balanceHint: { color: colors.mutedText, fontSize: 12, lineHeight: 18, marginTop: 10 },
+  budgetLink: { color: colors.green, fontSize: 13, fontWeight: '600', paddingVertical: 10 },
   saveButton: {
     height: 52,
     backgroundColor: colors.navy,

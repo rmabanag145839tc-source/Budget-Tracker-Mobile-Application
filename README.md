@@ -14,6 +14,10 @@ A mobile app for recording expenses in Philippine pesos and checking how much of
 - Create, rename, and delete custom categories
 - Choose expense dates with the native date picker
 - Set a monthly budget
+- Add funds to the budget or replace its full amount, with saved-total confirmation
+- Set a monthly savings goal and see whether the remaining balance is on track
+- View weekly, monthly, three-month, and yearly spending in Analytics, including past periods
+- Block new expenses that exceed the selected month's available budget, with a shortcut to add funds
 - Save expenses, categories, and the budget in a local SQLite database
 
 ## Tech stack
@@ -41,9 +45,21 @@ The app stores data in a SQLite file on the device. Each installation has its ow
 | --- | --- | --- |
 | `categories` | `id`, unique `name`, `created_at` | Available expense categories |
 | `transactions` | `id`, positive `amount`, `description`, `date`, `category_id`, `created_at` | Saved expenses; `category_id` references `categories.id` |
-| `settings` | `key`, `value` | The monthly budget and setup marker |
+| `settings` | `key`, `value` | Monthly budget, savings goal, and setup marker |
 
 `categoryQueries.js`, `transactionQueries.js`, and `settingsQueries.js` contain database reads and writes. SQLite's foreign key restriction prevents deleting a category used by an expense.
+
+## Budget, goal, and analytics
+
+Open **Budget & goal** on Home to add funds, replace the total monthly budget, or set a savings goal. Adding ₱500 to a ₱1,000 budget makes it ₱1,500. Setting the total to ₱500 replaces it with ₱500. Changes are saved to SQLite and refresh Home immediately. The single saved budget is a recurring monthly allowance, not a separate bank balance or a different budget for each month.
+
+The savings goal is the amount you want left at month end. It is saved under `savings_goal` in the existing `settings` table. It does not add funds or reserve money. Home compares it with this month's remaining balance; the result is a projection, not money already saved.
+
+The expense form shows the available amount for the selected date's month. Saving an expense above that amount is blocked with an **Insufficient balance** prompt. Choose **Add funds**, save a higher budget, then go back: the expense form keeps the details you entered. Editing excludes the original expense from the calculation. Reducing an existing expense is allowed even if its month is already over budget. Existing records are preserved.
+
+Open **Analytics** in the bottom bar. Pick Weekly, Monthly, 3 months, or Yearly, then use the arrows to browse older or newer periods. For September spending, choose Monthly and move to September. Weeks run Monday–Sunday; the current three-month view includes this month and the two before it. Analytics uses expense dates, not creation dates, and shows category totals. Three-month and yearly views also show monthly totals. Empty periods show zero. It reads existing expenses without storing duplicate totals.
+
+Calculations live in `src/utils/budgetMath.js`, date ranges in `src/utils/analyticsDates.js`, and the analytics screen in `src/screens/AnalyticsScreen.jsx`. No new dependencies are needed.
 
 ## Android APK
 

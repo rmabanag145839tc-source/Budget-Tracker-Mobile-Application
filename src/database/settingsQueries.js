@@ -13,3 +13,17 @@ export function setMonthlyBudget(amount) {
     [String(amount)]
   );
 }
+
+// The savings goal uses the existing settings table; older installations start at zero.
+export function getSavingsGoal() {
+  const row = db.getFirstSync("SELECT value FROM settings WHERE key = 'savings_goal'");
+  return row ? Number(row.value) : 0;
+}
+
+export function setSavingsGoal(amount) {
+  return db.runSync(
+    `INSERT INTO settings (key, value) VALUES ('savings_goal', ?)
+     ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
+    [String(amount)]
+  );
+}

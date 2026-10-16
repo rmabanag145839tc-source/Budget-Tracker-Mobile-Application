@@ -10,6 +10,7 @@ const symbols = {
   tag: '🏷️',
   home: '⌂',
   history: '≡',
+  analytics: '▥',
   add: '+',
   categories: '▦',
   back: '←',
