@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   backButton: {
-    width: 34,
+    width: 44,
     height: 44,
     justifyContent: 'center',
   },
@@ -32,7 +32,9 @@ const styles = StyleSheet.create({
     fontSize: 21,
     fontWeight: '700',
     marginLeft: 8,
+    flexShrink: 1,
   },
+  headerLogo: { marginLeft: 'auto' },
   form: {
     paddingHorizontal: 22,
     paddingTop: 14,
@@ -89,6 +91,7 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: 16,
   },
+  placeholder: { color: colors.mutedText },
   categoryChoices: {
     backgroundColor: colors.input,
     borderWidth: 1,
@@ -121,6 +124,8 @@ const styles = StyleSheet.create({
     color: colors.coral,
     marginTop: 12,
   },
+  balanceHint: { color: colors.mutedText, fontSize: 12, lineHeight: 18, marginTop: 10 },
+  budgetLink: { color: colors.green, fontSize: 13, fontWeight: '600', paddingVertical: 10 },
   saveButton: {
     height: 52,
     backgroundColor: colors.navy,

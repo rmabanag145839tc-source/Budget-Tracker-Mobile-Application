@@ -1,42 +1,57 @@
 import React from 'react';
-import { Alert, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import AppIcon from '../components/AppIcon';
+import BrandMark from '../components/BrandMark';
 import { useBudget } from '../context/BudgetContext';
 import { colors } from '../theme/expenseTrackerTheme';
+import { formatPeso } from '../utils/formatPeso';
 
 export default function ExpenseDetailsScreen({ navigation, route }) {
   const { expenses, deleteExpense } = useBudget();
+  // Look up the current saved expense by the ID passed from Home or History.
   const expense = expenses.find((item) => item.id === route.params?.expenseId);
 
   function confirmDelete() {
-    Alert.alert('Delete expense?', 'This removes it from the current app session.', [
+    Alert.alert('Delete expense?', 'This permanently removes the saved expense.', [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Delete',
         style: 'destructive',
         onPress: () => {
-          deleteExpense(expense.id);
-          navigation.goBack();
+          try {
+            deleteExpense(expense.id);
+            navigation.goBack();
+          } catch (error) {
+            console.error('Expense delete failed:', error);
+            Alert.alert('Could not delete expense', 'Please try again.');
+          }
         },
       },
     ]);
   }
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView style={styles.screen} edges={['top', 'right', 'bottom', 'left']}>
       <View style={styles.phone}>
         <View style={styles.header}>
-          <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Go back">
+          <Pressable
+            onPress={() => navigation.goBack()}
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
+            style={styles.backButton}
+          >
             <AppIcon name="back" color={colors.text} size={22} />
           </Pressable>
           <Text style={styles.title}>Expense details</Text>
+          <View style={styles.headerLogo}><BrandMark /></View>
         </View>
 
         {expense ? (
           <ScrollView contentContainerStyle={styles.content}>
             <View style={styles.summaryCard}>
               <Text style={styles.summaryLabel}>EXPENSE AMOUNT</Text>
-              <Text style={styles.amount}>${expense.amount.toFixed(2)}</Text>
+              <Text style={styles.amount}>{formatPeso(expense.amount)}</Text>
             </View>
             <View style={styles.detailCard}>
               <Detail label="Description" value={expense.description} />
@@ -44,6 +59,7 @@ export default function ExpenseDetailsScreen({ navigation, route }) {
               <Detail label="Date" value={expense.date} />
             </View>
 
+            {/* Pass this ID to reuse the add form with the expense's current values. */}
             <Pressable
               accessibilityRole="button"
               onPress={() => navigation.push('AddExpense', { expenseId: expense.id })}
@@ -92,11 +108,14 @@ const styles = StyleSheet.create({
     gap: 14,
     paddingHorizontal: 20,
   },
+  backButton: { width: 44, height: 44, justifyContent: 'center' },
   title: {
     color: colors.text,
     fontSize: 21,
     fontWeight: '700',
+    flexShrink: 1,
   },
+  headerLogo: { marginLeft: 'auto' },
   content: {
     padding: 22,
     paddingBottom: 36,

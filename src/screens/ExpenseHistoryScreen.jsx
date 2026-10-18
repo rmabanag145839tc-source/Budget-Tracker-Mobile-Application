@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import BottomTabs from '../components/BottomTabs';
+import BrandMark from '../components/BrandMark';
 import ExpenseRow from '../components/ExpenseRow';
 import { useBudget } from '../context/BudgetContext';
 import { colors } from '../theme/expenseTrackerTheme';
@@ -10,19 +12,23 @@ export default function ExpenseHistoryScreen({ navigation }) {
   const [filter, setFilter] = useState('All');
   // A renamed or deleted category should not leave the history stuck on an old filter.
   const selectedFilter = categories.includes(filter) ? filter : 'All';
+  // Filtering only changes what is shown; it does not change saved expenses.
   const visibleExpenses =
     selectedFilter === 'All'
       ? expenses
       : expenses.filter((expense) => expense.category === selectedFilter);
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView style={styles.screen} edges={['top', 'right', 'bottom', 'left']}>
       <View style={styles.phone}>
         <View style={styles.header}>
-          <Text style={styles.title}>Expense history</Text>
-          <Text style={styles.subtitle}>
-            {expenses.length === 1 ? '1 expense recorded' : `${expenses.length} expenses recorded`}
-          </Text>
+          <View>
+            <Text style={styles.title}>Expense history</Text>
+            <Text style={styles.subtitle}>
+              {expenses.length === 1 ? '1 expense recorded' : `${expenses.length} expenses recorded`}
+            </Text>
+          </View>
+          <BrandMark />
         </View>
 
         <ScrollView
@@ -45,8 +51,18 @@ export default function ExpenseHistoryScreen({ navigation }) {
           ))}
         </ScrollView>
 
-        <ScrollView style={styles.list}>
-          {visibleExpenses.length === 0 ? (
+        {/* FlatList handles long histories without drawing every row at once. */}
+        <FlatList
+          style={styles.list}
+          data={visibleExpenses}
+          keyExtractor={(expense) => String(expense.id)}
+          renderItem={({ item }) => (
+            <ExpenseRow
+              expense={item}
+              onPress={() => navigation.navigate('ExpenseDetails', { expenseId: item.id })}
+            />
+          )}
+          ListEmptyComponent={
             <View style={styles.emptyCard}>
               <Text style={styles.emptyTitle}>Nothing to show yet</Text>
               <Text style={styles.emptyText}>
@@ -55,16 +71,8 @@ export default function ExpenseHistoryScreen({ navigation }) {
                   : 'Try another category to see its expenses.'}
               </Text>
             </View>
-          ) : (
-            visibleExpenses.map((expense) => (
-              <ExpenseRow
-                key={expense.id}
-                expense={expense}
-                onPress={() => navigation.navigate('ExpenseDetails', { expenseId: expense.id })}
-              />
-            ))
-          )}
-        </ScrollView>
+          }
+        />
 
         <BottomTabs navigation={navigation} currentScreen="History" />
       </View>
@@ -86,6 +94,9 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: colors.navy,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 22,
     paddingTop: 22,
     paddingBottom: 24,

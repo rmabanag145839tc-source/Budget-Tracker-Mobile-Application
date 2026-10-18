@@ -1,6 +1,7 @@
 {
   "expo": {
-    "name": "ExpenseTracker",
+    "owner": "daridwayne",
+    "name": "Expense Tracker",
     "slug": "ExpenseTracker",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -10,15 +11,22 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.rmabanag.personalexpensetracker",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#0B2B49",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       }
     },
     "plugins": [
-      "@react-native-community/datetimepicker"
-    ]
+      "@react-native-community/datetimepicker",
+      "expo-sqlite"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "09c36005-ddcb-4a90-bbc0-d89f7df7f658"
+      }
+    }
   }
 }

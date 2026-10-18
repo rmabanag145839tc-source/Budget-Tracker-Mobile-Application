@@ -3,12 +3,12 @@ import { StyleSheet, Text, View } from 'react-native';
 import { colors } from '../theme/expenseTrackerTheme';
 
 // The number is the actual percent of this month's budget left.
-export default function SafetyGauge({ percent }) {
-  const color = percent < 30 ? colors.coral : colors.green;
+export default function SafetyGauge({ percent, noBudget = false }) {
+  const color = noBudget ? colors.mutedText : percent < 30 ? colors.coral : colors.green;
 
   return (
     <View style={[styles.ring, { borderColor: color }]}>
-      <Text style={[styles.number, { color }]}>{percent}%</Text>
+      <Text style={[styles.number, { color }]}>{noBudget ? '—' : `${percent}%`}</Text>
     </View>
   );
 }

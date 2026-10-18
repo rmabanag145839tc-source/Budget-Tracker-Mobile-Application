@@ -16,18 +16,18 @@ Use `bunx` instead of `npx` if the project uses bun (`bun.lock` present).
 npx expo install <package>  # ALWAYS use instead of npm/yarn/pnpm/bun add — resolves SDK-compatible versions
 npx expo start              # start the dev server
 npx expo lint               # lint
-npx tsc --noEmit            # typecheck
 npx expo-doctor             # diagnose dependency and config issues
 npx expo install --fix      # fix incompatible package versions
 ```
 
-Run lint and typecheck before declaring any task done.
+Run lint before declaring a task done. This JavaScript/JSX project has no tsconfig.json, so TypeScript typechecking is not configured.
 
 ## Navigation & Routing
 
-- Use **Expo Router** for all navigation. Routes live in `src/app/` — every file there is a screen, `_layout.tsx` files define navigators. Keep non-route code (components, hooks, utils) outside `src/app/`.
-- Import `Link`, `router`, and `useLocalSearchParams` from `expo-router`.
-- Docs: https://docs.expo.dev/router/introduction.md
+- Keep the existing React Navigation native stack in `src/navigation/AppNavigator.jsx`.
+- Screen names in that file are used by `navigation.navigate` and `navigation.push`.
+- The shared bottom controls live in `src/components/BottomTabs.jsx`.
+- Keep screens as readable JSX files in `src/screens/`.
 
 ## Building with EAS
 

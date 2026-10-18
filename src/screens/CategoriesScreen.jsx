@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
-import { Alert, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import BottomTabs from '../components/BottomTabs';
+import BrandMark from '../components/BrandMark';
+import AppIcon, { categoryIconName } from '../components/AppIcon';
 import { startingCategories, useBudget } from '../context/BudgetContext';
 import { colors } from '../theme/expenseTrackerTheme';
 
 export default function CategoriesScreen({ navigation }) {
   const { categories, expenses, addCategory, renameCategory, deleteCategory } = useBudget();
+  // These fields are form drafts; the saved list comes from BudgetContext.
   const [newName, setNewName] = useState('');
   const [editingName, setEditingName] = useState('');
   const [draftName, setDraftName] = useState('');
@@ -30,8 +34,13 @@ export default function CategoriesScreen({ navigation }) {
       return;
     }
 
-    addCategory(name);
-    setNewName('');
+    try {
+      addCategory(name);
+      setNewName('');
+    } catch (error) {
+      console.error('Category add failed:', error);
+      Alert.alert('Could not add category', 'Please try another name.');
+    }
   }
 
   function handleRename() {
@@ -42,8 +51,13 @@ export default function CategoriesScreen({ navigation }) {
     }
 
     // Renaming also changes the category on any expenses that used it.
-    renameCategory(editingName, name);
-    setEditingName('');
+    try {
+      renameCategory(editingName, name);
+      setEditingName('');
+    } catch (error) {
+      console.error('Category rename failed:', error);
+      Alert.alert('Could not rename category', 'Please try another name.');
+    }
   }
 
   function handleDelete(name) {
@@ -54,16 +68,30 @@ export default function CategoriesScreen({ navigation }) {
 
     Alert.alert('Delete category?', name, [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: () => deleteCategory(name) },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => {
+          try {
+            deleteCategory(name);
+          } catch (error) {
+            console.error('Category delete failed:', error);
+            Alert.alert('Could not delete category', 'Please try again.');
+          }
+        },
+      },
     ]);
   }
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView style={styles.screen} edges={['top', 'right', 'bottom', 'left']}>
       <View style={styles.phone}>
         <View style={styles.header}>
-          <Text style={styles.title}>Categories</Text>
-          <Text style={styles.subtitle}>Keep your spending organized</Text>
+          <View>
+            <Text style={styles.title}>Categories</Text>
+            <Text style={styles.subtitle}>Keep your spending organized</Text>
+          </View>
+          <BrandMark />
         </View>
 
         <ScrollView
@@ -96,10 +124,14 @@ export default function CategoriesScreen({ navigation }) {
 
           <Text style={styles.listTitle}>Your categories</Text>
           {categories.map((name) => {
+            // The starting categories stay available; custom ones can be renamed or removed.
             const isBuiltIn = startingCategories.includes(name);
 
             return (
               <View key={name} style={styles.categoryRow}>
+                <View style={styles.categoryIcon}>
+                  <AppIcon name={categoryIconName(name)} color={colors.green} size={18} />
+                </View>
                 {editingName === name ? (
                   <TextInput
                     accessibilityLabel="Edit category name"
@@ -169,6 +201,9 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: colors.navy,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 22,
     paddingTop: 22,
     paddingBottom: 24,
@@ -221,6 +256,14 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingHorizontal: 14,
     marginTop: 8,
+  },
+  categoryIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: colors.navy,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   categoryName: {
     color: colors.text,

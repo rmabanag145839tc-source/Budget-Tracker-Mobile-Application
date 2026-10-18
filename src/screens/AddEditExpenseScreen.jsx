@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
-import { Platform, Pressable, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native';
+import { Alert, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import AppIcon from '../components/AppIcon';
+import BrandMark from '../components/BrandMark';
 import { useBudget } from '../context/BudgetContext';
 import { colors } from '../theme/expenseTrackerTheme';
 import styles from './addEditExpenseStyles';
+import { availableForExpense, roundMoney } from '../utils/budgetMath';
+import { formatPeso } from '../utils/formatPeso';
 
 function dateForStorage(date) {
   // Expenses store dates as YYYY-MM-DD so monthly totals are easy to calculate.
@@ -16,31 +20,36 @@ function dateForStorage(date) {
 
 function dateFromStorage(savedDate) {
   if (!savedDate) return new Date();
+  // JavaScript months start at zero, so January in the saved date becomes month 0.
   const [year, month, day] = savedDate.split('-').map(Number);
   return new Date(year, month - 1, day);
 }
 
 export default function AddEditExpenseScreen({ navigation, route }) {
-  const { expenses, categories, saveExpense } = useBudget();
+  const { expenses, categories, monthlyBudget, saveExpense } = useBudget();
   const expenseId = route.params?.expenseId;
   // An ID means we are editing. Without one, this is a new expense.
   const expenseToEdit = expenses.find((expense) => expense.id === expenseId);
 
   // TextInputs keep text while the user types. We convert amount when saving.
   const [amount, setAmount] = useState(expenseToEdit ? String(expenseToEdit.amount) : '');
-  const [category, setCategory] = useState(expenseToEdit?.category || 'Transport');
+  const [category, setCategory] = useState(expenseToEdit?.category || '');
   const [date, setDate] = useState(() => dateFromStorage(expenseToEdit?.date));
   const [description, setDescription] = useState(expenseToEdit?.description || '');
   const [showCategories, setShowCategories] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [error, setError] = useState('');
+  const available = availableForExpense(expenses, monthlyBudget, dateForStorage(date), expenseId);
 
   function openDatePicker() {
+    // Android opens its date dialog; iOS shows the picker in this form.
     if (Platform.OS === 'android') {
       DateTimePickerAndroid.open({
         value: date,
         mode: 'date',
-        onValueChange: (_, chosenDate) => setDate(chosenDate),
+        onValueChange: (_, chosenDate) => {
+          if (chosenDate) setDate(chosenDate);
+        },
       });
     } else {
       setShowDatePicker(true);
@@ -48,30 +57,55 @@ export default function AddEditExpenseScreen({ navigation, route }) {
   }
 
   function handleSave() {
+    // Inputs are text while typing, so check them before sending data to SQLite.
     const numberAmount = Number(amount);
 
-    if (!Number.isFinite(numberAmount) || numberAmount <= 0) {
-      setError('Enter an amount greater than zero.');
+    if (!Number.isFinite(numberAmount) || roundMoney(numberAmount) <= 0) {
+      setError('Enter an amount of at least ₱0.01.');
       return;
     }
     if (!description.trim()) {
       setError('Enter a description.');
       return;
     }
+    if (!category) {
+      setError('Choose a category.');
+      return;
+    }
 
-    // Saving updates the shared React state, so the other screens refresh.
-    saveExpense({
-      id: expenseToEdit?.id,
-      amount: numberAmount,
-      category,
-      date: dateForStorage(date),
-      description: description.trim(),
-    });
-    navigation.goBack();
+    try {
+      // Save to SQLite, then refresh the shared state used by the other screens.
+      saveExpense({
+        id: expenseToEdit?.id,
+        amount: numberAmount,
+        category,
+        date: dateForStorage(date),
+        description: description.trim(),
+      });
+      navigation.goBack();
+    } catch (saveError) {
+      if (saveError.code === 'INSUFFICIENT_BALANCE') {
+        setError(saveError.message);
+        Alert.alert('Insufficient balance', saveError.message, [
+          { text: 'Keep editing', style: 'cancel' },
+          // Opening settings keeps this form in the stack, so typed details are preserved.
+          {
+            text: 'Add funds',
+            onPress: () => {
+              setError('');
+              navigation.navigate('BudgetSettings');
+            },
+          },
+        ]);
+        return;
+      }
+      console.error('Expense save failed:', saveError);
+      setError('Could not save the expense. Check the category and try again.');
+    }
   }
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView style={styles.screen} edges={['top', 'right', 'bottom', 'left']}>
       <View style={styles.phone}>
         <View style={styles.header}>
           <Pressable
@@ -83,6 +117,7 @@ export default function AddEditExpenseScreen({ navigation, route }) {
             <AppIcon name="back" color={colors.text} size={22} />
           </Pressable>
           <Text style={styles.title}>{expenseToEdit ? 'Edit expense' : 'Add expense'}</Text>
+          <View style={styles.headerLogo}><BrandMark /></View>
         </View>
 
         <ScrollView
@@ -93,7 +128,7 @@ export default function AddEditExpenseScreen({ navigation, route }) {
         >
           <Text style={styles.label}>Amount</Text>
           <View style={styles.amountBox}>
-            <Text style={styles.currencySymbol}>$</Text>
+            <Text style={styles.currencySymbol}>₱</Text>
             <TextInput
               accessibilityLabel="Amount"
               style={styles.amount}
@@ -104,6 +139,19 @@ export default function AddEditExpenseScreen({ navigation, route }) {
               placeholderTextColor={colors.mutedText}
             />
           </View>
+          <Text style={styles.balanceHint}>
+            Available for {date.toLocaleDateString('en-PH', { month: 'long', year: 'numeric' })}: {formatPeso(available)}
+            {expenseToEdit ? ' (excluding this expense)' : ''}
+          </Text>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => {
+              setError('');
+              navigation.navigate('BudgetSettings');
+            }}
+          >
+            <Text style={styles.budgetLink}>Manage budget / add funds</Text>
+          </Pressable>
 
           <Text style={styles.label}>Category</Text>
           <Pressable
@@ -112,7 +160,9 @@ export default function AddEditExpenseScreen({ navigation, route }) {
             onPress={() => setShowCategories((current) => !current)}
             style={[styles.field, styles.selectedField]}
           >
-            <Text style={styles.fieldText}>{category}</Text>
+            <Text style={[styles.fieldText, !category && styles.placeholder]}>
+              {category || 'Choose a category'}
+            </Text>
             <AppIcon name="dropdown" color={colors.text} />
           </Pressable>
           {showCategories && (
@@ -151,7 +201,9 @@ export default function AddEditExpenseScreen({ navigation, route }) {
                 mode="date"
                 display="inline"
                 themeVariant="dark"
-                onValueChange={(_, chosenDate) => setDate(chosenDate)}
+                onValueChange={(_, chosenDate) => {
+                  if (chosenDate) setDate(chosenDate);
+                }}
               />
               <Pressable onPress={() => setShowDatePicker(false)} style={styles.dateDoneButton}>
                 <Text style={styles.dateDoneText}>Done</Text>

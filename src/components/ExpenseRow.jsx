@@ -1,12 +1,14 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import AppIcon, { categoryIconName } from './AppIcon';
 import { colors } from '../theme/expenseTrackerTheme';
+import { formatPeso } from '../utils/formatPeso';
 
 export default function ExpenseRow({ expense, onPress }) {
   return (
     <Pressable onPress={onPress} style={styles.row} accessibilityRole="button">
       <View style={styles.iconBadge}>
-        <Text style={styles.iconText}>{expense.category.charAt(0)}</Text>
+        <AppIcon name={categoryIconName(expense.category)} color={colors.green} size={19} />
       </View>
       <View style={styles.details}>
         <Text style={styles.description} numberOfLines={1}>{expense.description}</Text>
@@ -14,7 +16,7 @@ export default function ExpenseRow({ expense, onPress }) {
           {expense.category} · {expense.date}
         </Text>
       </View>
-      <Text style={styles.amount}>-${expense.amount.toFixed(2)}</Text>
+      <Text style={styles.amount}>-{formatPeso(expense.amount)}</Text>
     </Pressable>
   );
 }
@@ -40,11 +42,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.navy,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  iconText: {
-    color: colors.green,
-    fontSize: 17,
-    fontWeight: '700',
   },
   details: {
     flex: 1,
