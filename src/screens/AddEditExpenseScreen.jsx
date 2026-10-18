@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Alert, Platform, Pressable, SafeAreaView, ScrollView, Text, TextInput, View } from 'react-native';
+import { Alert, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import AppIcon from '../components/AppIcon';
 import BrandMark from '../components/BrandMark';
@@ -104,7 +105,7 @@ export default function AddEditExpenseScreen({ navigation, route }) {
   }
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView style={styles.screen} edges={['top', 'right', 'bottom', 'left']}>
       <View style={styles.phone}>
         <View style={styles.header}>
           <Pressable

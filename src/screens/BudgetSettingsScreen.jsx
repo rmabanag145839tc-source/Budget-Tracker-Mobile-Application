@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Alert, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import AppIcon from '../components/AppIcon';
 import BrandMark from '../components/BrandMark';
 import { useBudget } from '../context/BudgetContext';
@@ -78,10 +79,15 @@ export default function BudgetSettingsScreen({ navigation }) {
   }
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView style={styles.screen} edges={['top', 'right', 'bottom', 'left']}>
       <View style={styles.phone}>
         <View style={styles.header}>
-          <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Go back">
+          <Pressable
+            onPress={() => navigation.goBack()}
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
+            style={styles.backButton}
+          >
             <AppIcon name="back" color={colors.text} size={22} />
           </Pressable>
           <Text style={styles.title}>Budget & goal</Text>
@@ -166,6 +172,11 @@ const styles = StyleSheet.create({
     fontSize: 21,
     fontWeight: '700',
     flexShrink: 1,
+  },
+  backButton: {
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
   },
   headerLogo: {
     marginLeft: 'auto',

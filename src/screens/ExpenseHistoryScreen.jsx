@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { FlatList, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import BottomTabs from '../components/BottomTabs';
 import BrandMark from '../components/BrandMark';
 import ExpenseRow from '../components/ExpenseRow';
@@ -18,7 +19,7 @@ export default function ExpenseHistoryScreen({ navigation }) {
       : expenses.filter((expense) => expense.category === selectedFilter);
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView style={styles.screen} edges={['top', 'right', 'bottom', 'left']}>
       <View style={styles.phone}>
         <View style={styles.header}>
           <View>

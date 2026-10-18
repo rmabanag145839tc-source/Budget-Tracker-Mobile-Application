@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import AppIcon, { categoryIconName } from '../components/AppIcon';
 import BottomTabs from '../components/BottomTabs';
 import BrandMark from '../components/BrandMark';
@@ -73,7 +74,7 @@ export default function AnalyticsScreen({ navigation }) {
   }
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView style={styles.screen} edges={['top', 'right', 'bottom', 'left']}>
       <View style={styles.phone}>
         <View style={styles.header}>
           <Text style={styles.title}>Spending analytics</Text>

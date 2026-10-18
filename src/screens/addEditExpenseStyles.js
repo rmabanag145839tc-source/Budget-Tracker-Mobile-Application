@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   backButton: {
-    width: 34,
+    width: 44,
     height: 44,
     justifyContent: 'center',
   },
@@ -32,6 +32,7 @@ const styles = StyleSheet.create({
     fontSize: 21,
     fontWeight: '700',
     marginLeft: 8,
+    flexShrink: 1,
   },
   headerLogo: { marginLeft: 'auto' },
   form: {

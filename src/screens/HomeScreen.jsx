@@ -1,5 +1,6 @@
 import React from 'react';
-import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import BottomTabs from '../components/BottomTabs';
 import ExpenseRow from '../components/ExpenseRow';
 import SafetyGauge from '../components/SafetyGauge';
@@ -46,7 +47,7 @@ export default function HomeScreen({ navigation }) {
   }
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView style={styles.screen} edges={['top', 'right', 'bottom', 'left']}>
       <View style={styles.phone}>
         <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
           <View style={styles.balanceCard}>
@@ -56,6 +57,7 @@ export default function HomeScreen({ navigation }) {
                 accessibilityRole="button"
                 accessibilityLabel="Edit monthly budget"
                 onPress={() => navigation.navigate('BudgetSettings')}
+                style={styles.budgetButton}
               >
                 <Text style={styles.editBudget}>Budget & goal</Text>
               </Pressable>
@@ -198,6 +200,11 @@ const styles = StyleSheet.create({
   },
   topRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   editBudget: { color: colors.green, fontSize: 12, fontWeight: '700' },
+  budgetButton: {
+    minHeight: 44,
+    justifyContent: 'center',
+    paddingHorizontal: 8,
+  },
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: 9, marginTop: 9 },
   name: {
     color: colors.text,

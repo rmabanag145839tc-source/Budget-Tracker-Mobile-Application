@@ -1,5 +1,6 @@
 import React from 'react';
-import { Alert, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import AppIcon from '../components/AppIcon';
 import BrandMark from '../components/BrandMark';
 import { useBudget } from '../context/BudgetContext';
@@ -31,10 +32,15 @@ export default function ExpenseDetailsScreen({ navigation, route }) {
   }
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView style={styles.screen} edges={['top', 'right', 'bottom', 'left']}>
       <View style={styles.phone}>
         <View style={styles.header}>
-          <Pressable onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel="Go back">
+          <Pressable
+            onPress={() => navigation.goBack()}
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
+            style={styles.backButton}
+          >
             <AppIcon name="back" color={colors.text} size={22} />
           </Pressable>
           <Text style={styles.title}>Expense details</Text>
@@ -102,10 +108,12 @@ const styles = StyleSheet.create({
     gap: 14,
     paddingHorizontal: 20,
   },
+  backButton: { width: 44, height: 44, justifyContent: 'center' },
   title: {
     color: colors.text,
     fontSize: 21,
     fontWeight: '700',
+    flexShrink: 1,
   },
   headerLogo: { marginLeft: 'auto' },
   content: {

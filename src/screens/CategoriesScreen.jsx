@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Alert, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import BottomTabs from '../components/BottomTabs';
 import BrandMark from '../components/BrandMark';
 import AppIcon, { categoryIconName } from '../components/AppIcon';
@@ -83,7 +84,7 @@ export default function CategoriesScreen({ navigation }) {
   }
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView style={styles.screen} edges={['top', 'right', 'bottom', 'left']}>
       <View style={styles.phone}>
         <View style={styles.header}>
           <View>
